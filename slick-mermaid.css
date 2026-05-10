@@ -1,123 +1,23 @@
 /*
  * obsidian-slick-mermaid
  * Minimal, monotone Mermaid theme for Obsidian — designed for the baseline theme.
- * Drop this file into: <vault>/.obsidian/snippets/slick-mermaid.css
- * Then enable it in Settings → Appearance → CSS Snippets.
+ * Drop into: <vault>/.obsidian/snippets/slick-mermaid.css
+ * Enable in: Settings → Appearance → CSS Snippets
  *
- * Works in both light and dark mode. Inherits all color tokens from baseline.
- * No configuration required.
+ * v2 — direct SVG element targeting.
+ * Mermaid bakes theme colors as inline SVG attributes at render time, so CSS
+ * variable overrides on the root are insufficient. This version targets every
+ * rendered shape class directly with !important to guarantee override.
  */
 
-/* ─── Core Mermaid variable overrides ──────────────────────────────────────── */
-/*
- * Mermaid's "base" theme exposes these CSS variables on the SVG root.
- * We override them via the .mermaid wrapper which Obsidian renders into.
- * Both .mermaid (Live Preview) and .mermaid-preview (Reading Mode) are targeted.
- */
-
-.mermaid,
-.mermaid-preview {
-  /* Diagram background — transparent so the note background shows through */
-  --mermaid-bg: transparent;
-}
-
-/* Target the SVG itself — this is where Mermaid reads its theme vars */
-.mermaid svg,
-.mermaid-preview svg {
-  /* ── Base palette ──────────────────────────────────────────────────── */
-  --primaryColor:         var(--color-base-20);
-  --primaryTextColor:     var(--text-normal);
-  --primaryBorderColor:   var(--color-base-40);
-  --secondaryColor:       var(--color-base-10);
-  --secondaryTextColor:   var(--text-muted);
-  --secondaryBorderColor: var(--color-base-30);
-  --tertiaryColor:        var(--color-base-10);
-  --tertiaryTextColor:    var(--text-muted);
-  --tertiaryBorderColor:  var(--color-base-30);
-
-  /* ── Canvas + fills ────────────────────────────────────────────────── */
-  --background:           transparent;
-  --mainBkg:              var(--color-base-20);
-  --nodeBorder:           var(--color-base-40);
-  --clusterBkg:           var(--color-base-10);
-  --clusterBorder:        var(--color-base-30);
-  --titleColor:           var(--text-muted);
-  --edgeLabelBackground:  var(--background-primary);
-
-  /* ── Lines + edges ─────────────────────────────────────────────────── */
-  --lineColor:            var(--color-base-50);
-  --arrowheadColor:       var(--color-base-50);
-
-  /* ── Typography ────────────────────────────────────────────────────── */
-  --fontFamily:           "Geist", var(--font-text-theme, "Inter"), ui-sans-serif, sans-serif;
-  --fontSize:             13px;
-  --labelBackground:      var(--background-primary);
-  --labelTextColor:       var(--text-normal);
-
-  /* ── Special diagram types ─────────────────────────────────────────── */
-  /* Sequence diagrams */
-  --actorBkg:             var(--color-base-20);
-  --actorBorder:          var(--color-base-40);
-  --actorTextColor:       var(--text-normal);
-  --actorLineColor:       var(--color-base-40);
-  --signalColor:          var(--text-muted);
-  --signalTextColor:      var(--text-normal);
-  --sequenceNumberColor:  var(--background-primary);
-  --activationBorderColor: var(--color-base-50);
-  --activationBkgColor:   var(--color-base-30);
-  --noteBkgColor:         var(--color-base-20);
-  --noteTextColor:        var(--text-muted);
-  --noteBorderColor:      var(--color-base-40);
-  --loopTextColor:        var(--text-muted);
-
-  /* Gantt */
-  --section0:             var(--color-base-10);
-  --section1:             var(--color-base-20);
-  --sectionBkgColor:      var(--color-base-10);
-  --altSectionBkgColor:   var(--color-base-00);
-  --gridColor:            var(--color-base-30);
-  --todayLineColor:       var(--color-accent);
-  --taskBkgColor:         var(--color-base-30);
-  --taskBorderColor:      var(--color-base-40);
-  --taskTextColor:        var(--text-normal);
-  --taskTextOutsideColor: var(--text-muted);
-  --taskTextClickableColor: var(--text-normal);
-  --activeTaskBkgColor:   var(--color-base-40);
-  --activeTaskBorderColor: var(--color-base-50);
-  --doneTaskBkgColor:     var(--color-base-20);
-  --doneTaskBorderColor:  var(--color-base-30);
-  --critBkgColor:         var(--color-base-30);
-  --critBorderColor:      var(--color-base-50);
-  --critTextColor:        var(--text-normal);
-  --taskTextLightColor:   var(--text-muted);
-
-  /* Git graph */
-  --git0:                 var(--color-base-50);
-  --git1:                 var(--color-base-40);
-  --git2:                 var(--color-base-60);
-  --git3:                 var(--color-base-35);
-  --git4:                 var(--color-base-70);
-  --git5:                 var(--color-base-30);
-  --git6:                 var(--color-base-50);
-  --git7:                 var(--color-base-40);
-  --gitBranchLabel0:      var(--background-primary);
-  --gitBranchLabel1:      var(--background-primary);
-  --gitInvLabel0:         var(--text-normal);
-  --gitInvLabel1:         var(--text-normal);
-}
-
-/* ─── Fit-to-container ──────────────────────────────────────────────────────── */
-/*
- * Scale the SVG to fill the full content width.
- * height: auto preserves aspect ratio. max-width: 100% prevents overflow.
- * The wrapper also gets a clean reset — no extra padding from Obsidian defaults.
- */
+/* ─── Fit-to-container ───────────────────────────────────────────────────────── */
 
 .mermaid,
 .mermaid-preview {
   width: 100%;
   overflow: visible;
   margin: 1.25em 0;
+  background: transparent !important;
 }
 
 .mermaid svg,
@@ -126,114 +26,448 @@
   height: auto !important;
   max-width: 100%;
   display: block;
+  background: transparent !important;
 }
 
-/* ─── Typography cleanup ─────────────────────────────────────────────────────── */
-/*
- * Force font inheritance into the SVG text elements.
- * Mermaid renders these as <text> elements — the font-family var above sets the
- * CSS variable but we also need to target the rendered elements directly.
- */
+/* ─── Typography ─────────────────────────────────────────────────────────────── */
 
 .mermaid text,
 .mermaid-preview text,
-.mermaid .label,
-.mermaid-preview .label {
+.mermaid span,
+.mermaid-preview span {
   font-family: "Geist", var(--font-text-theme, "Inter"), ui-sans-serif, sans-serif !important;
+  font-size: 13px !important;
 }
 
-/* ─── Node shape refinements ─────────────────────────────────────────────────── */
-/*
- * Remove any drop shadows Mermaid injects via filter attributes.
- * Thin down stroke weights for a cleaner look.
- */
+/* ─── Flowchart / Graph — node shapes ───────────────────────────────────────── */
 
+/* Default node — rect */
 .mermaid .node rect,
+.mermaid-preview .node rect {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
+  stroke-width: 1px !important;
+  filter: none !important;
+}
+
+/* Round / stadium nodes */
 .mermaid .node circle,
 .mermaid .node ellipse,
-.mermaid .node polygon,
-.mermaid .node path,
-.mermaid-preview .node rect,
 .mermaid-preview .node circle,
-.mermaid-preview .node ellipse,
-.mermaid-preview .node polygon,
+.mermaid-preview .node ellipse {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
+  stroke-width: 1px !important;
+  filter: none !important;
+}
+
+/* Diamond / polygon nodes */
+.mermaid .node polygon,
+.mermaid-preview .node polygon {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
+  stroke-width: 1px !important;
+  filter: none !important;
+}
+
+/* Path-based node shapes (hexagon, parallelogram, etc.) */
+.mermaid .node path,
 .mermaid-preview .node path {
-  filter: none !important;
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
   stroke-width: 1px !important;
-}
-
-/* Cluster / subgraph borders */
-.mermaid .cluster rect,
-.mermaid-preview .cluster rect {
-  stroke-width: 1px !important;
-  stroke-dasharray: 4 2 !important;
   filter: none !important;
 }
 
-/* Edge lines */
+/* Label background */
+.mermaid .label-container,
+.mermaid-preview .label-container {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
+  stroke-width: 1px !important;
+  filter: none !important;
+}
+
+/* ─── Flowchart / Graph — node labels ───────────────────────────────────────── */
+
+.mermaid .nodeLabel,
+.mermaid .label,
+.mermaid-preview .nodeLabel,
+.mermaid-preview .label {
+  color: var(--text-normal) !important;
+  fill: var(--text-normal) !important;
+}
+
+.mermaid .label foreignObject,
+.mermaid-preview .label foreignObject {
+  color: var(--text-normal) !important;
+}
+
+.mermaid .nodeLabel p,
+.mermaid-preview .nodeLabel p {
+  color: var(--text-normal) !important;
+  background: transparent !important;
+}
+
+/* Text inside nodes */
+.mermaid .node text,
+.mermaid-preview .node text {
+  fill: var(--text-normal) !important;
+}
+
+/* ─── Flowchart / Graph — edges ─────────────────────────────────────────────── */
+
 .mermaid .edgePath path,
 .mermaid-preview .edgePath path {
+  stroke: var(--color-base-50) !important;
+  stroke-width: 1.25px !important;
+  fill: none !important;
+}
+
+.mermaid .edgePath marker path,
+.mermaid-preview .edgePath marker path,
+.mermaid marker path,
+.mermaid-preview marker path {
+  fill: var(--color-base-50) !important;
+  stroke: var(--color-base-50) !important;
+  stroke-width: 1px !important;
+}
+
+/* Edge labels */
+.mermaid .edgeLabel,
+.mermaid-preview .edgeLabel {
+  background: var(--background-primary) !important;
+  color: var(--text-muted) !important;
+}
+
+.mermaid .edgeLabel rect,
+.mermaid-preview .edgeLabel rect {
+  fill: var(--background-primary) !important;
+  stroke: none !important;
+  opacity: 1 !important;
+}
+
+.mermaid .edgeLabel span,
+.mermaid-preview .edgeLabel span {
+  color: var(--text-muted) !important;
+  background: var(--background-primary) !important;
+}
+
+/* ─── Flowchart / Graph — clusters / subgraphs ──────────────────────────────── */
+
+.mermaid .cluster rect,
+.mermaid-preview .cluster rect {
+  fill: var(--color-base-10) !important;
+  stroke: var(--color-base-30) !important;
+  stroke-width: 1px !important;
+  stroke-dasharray: 5 3 !important;
+  filter: none !important;
+}
+
+.mermaid .cluster text,
+.mermaid-preview .cluster text {
+  fill: var(--text-muted) !important;
+}
+
+/* ─── Sequence diagram ───────────────────────────────────────────────────────── */
+
+/* Actor boxes */
+.mermaid .actor,
+.mermaid-preview .actor {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .actor-line,
+.mermaid-preview .actor-line {
+  stroke: var(--color-base-30) !important;
+  stroke-width: 1px !important;
+}
+
+/* Messages */
+.mermaid .messageLine0,
+.mermaid .messageLine1,
+.mermaid-preview .messageLine0,
+.mermaid-preview .messageLine1 {
+  stroke: var(--color-base-50) !important;
   stroke-width: 1.25px !important;
 }
 
-/* Arrowheads */
-.mermaid marker path,
-.mermaid-preview marker path {
+.mermaid .messageText,
+.mermaid-preview .messageText {
+  fill: var(--text-normal) !important;
+  stroke: none !important;
+}
+
+.mermaid .loopText,
+.mermaid .loopText > tspan,
+.mermaid-preview .loopText,
+.mermaid-preview .loopText > tspan {
+  fill: var(--text-muted) !important;
+}
+
+/* Loop / alt / opt boxes */
+.mermaid .labelBox,
+.mermaid-preview .labelBox {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
+}
+
+.mermaid .labelText,
+.mermaid-preview .labelText {
+  fill: var(--text-muted) !important;
+}
+
+.mermaid .loopLine,
+.mermaid-preview .loopLine {
+  stroke: var(--color-base-40) !important;
   stroke-width: 1px !important;
 }
 
-/* ─── Fullscreen trigger ─────────────────────────────────────────────────────── */
+/* Notes */
+.mermaid .note,
+.mermaid-preview .note {
+  fill: var(--color-base-10) !important;
+  stroke: var(--color-base-30) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .noteText,
+.mermaid-preview .noteText {
+  fill: var(--text-muted) !important;
+}
+
+/* Activation boxes */
+.mermaid .activation0,
+.mermaid .activation1,
+.mermaid .activation2,
+.mermaid-preview .activation0,
+.mermaid-preview .activation1,
+.mermaid-preview .activation2 {
+  fill: var(--color-base-30) !important;
+  stroke: var(--color-base-50) !important;
+  stroke-width: 1px !important;
+}
+
+/* Sequence numbers */
+.mermaid .sequenceNumber,
+.mermaid-preview .sequenceNumber {
+  fill: var(--background-primary) !important;
+}
+
+/* Actor labels */
+.mermaid #arrowhead path,
+.mermaid-preview #arrowhead path {
+  fill: var(--color-base-50) !important;
+  stroke: var(--color-base-50) !important;
+}
+
+/* ─── Gantt chart ────────────────────────────────────────────────────────────── */
+
+.mermaid .mermaid-main-font,
+.mermaid-preview .mermaid-main-font {
+  font-family: "Geist", var(--font-text-theme, "Inter"), sans-serif !important;
+}
+
+.mermaid .grid .tick line,
+.mermaid-preview .grid .tick line {
+  stroke: var(--color-base-30) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .grid path,
+.mermaid-preview .grid path {
+  stroke: var(--color-base-30) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .section0, .mermaid .section2,
+.mermaid-preview .section0, .mermaid-preview .section2 {
+  fill: var(--color-base-10) !important;
+  opacity: 1 !important;
+}
+
+.mermaid .section1, .mermaid .section3,
+.mermaid-preview .section1, .mermaid-preview .section3 {
+  fill: var(--background-primary) !important;
+  opacity: 1 !important;
+}
+
+.mermaid .task,
+.mermaid-preview .task {
+  fill: var(--color-base-30) !important;
+  stroke: var(--color-base-40) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .activeTask,
+.mermaid-preview .activeTask {
+  fill: var(--color-base-40) !important;
+  stroke: var(--color-base-50) !important;
+}
+
+.mermaid .doneTask,
+.mermaid-preview .doneTask {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-30) !important;
+}
+
+.mermaid .critTask,
+.mermaid-preview .critTask {
+  fill: var(--color-base-35) !important;
+  stroke: var(--color-base-50) !important;
+}
+
+.mermaid .taskText,
+.mermaid .taskTextOutsideRight,
+.mermaid .taskTextOutsideLeft,
+.mermaid-preview .taskText,
+.mermaid-preview .taskTextOutsideRight,
+.mermaid-preview .taskTextOutsideLeft {
+  fill: var(--text-normal) !important;
+  font-family: "Geist", var(--font-text-theme), sans-serif !important;
+}
+
+.mermaid .today,
+.mermaid-preview .today {
+  stroke: var(--color-accent) !important;
+  stroke-width: 1.5px !important;
+}
+
+/* ─── State diagram ──────────────────────────────────────────────────────────── */
+
+.mermaid .state-note rect,
+.mermaid-preview .state-note rect {
+  fill: var(--color-base-10) !important;
+  stroke: var(--color-base-30) !important;
+}
+
+.mermaid .statediagram-state rect.basic,
+.mermaid .statediagram-state rect.divider,
+.mermaid-preview .statediagram-state rect.basic,
+.mermaid-preview .statediagram-state rect.divider {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .statediagram-cluster rect,
+.mermaid-preview .statediagram-cluster rect {
+  fill: var(--color-base-10) !important;
+  stroke: var(--color-base-30) !important;
+}
+
+.mermaid .start-state,
+.mermaid-preview .start-state {
+  fill: var(--text-normal) !important;
+  stroke: var(--text-normal) !important;
+}
+
+.mermaid .end-state-outer,
+.mermaid-preview .end-state-outer {
+  fill: var(--text-normal) !important;
+  stroke: var(--text-normal) !important;
+}
+
+.mermaid .end-state-inner,
+.mermaid-preview .end-state-inner {
+  fill: var(--background-primary) !important;
+}
+
+.mermaid .transition path,
+.mermaid-preview .transition path {
+  stroke: var(--color-base-50) !important;
+  stroke-width: 1.25px !important;
+}
+
+/* ─── ER diagram ─────────────────────────────────────────────────────────────── */
+
+.mermaid .er.entityBox,
+.mermaid-preview .er.entityBox {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .er.attributeBoxOdd,
+.mermaid-preview .er.attributeBoxOdd {
+  fill: var(--color-base-10) !important;
+  stroke: var(--color-base-30) !important;
+}
+
+.mermaid .er.attributeBoxEven,
+.mermaid-preview .er.attributeBoxEven {
+  fill: var(--background-primary) !important;
+  stroke: var(--color-base-30) !important;
+}
+
+.mermaid .er.entityLabel,
+.mermaid-preview .er.entityLabel {
+  fill: var(--text-normal) !important;
+}
+
+.mermaid .er.relationshipLine,
+.mermaid-preview .er.relationshipLine {
+  stroke: var(--color-base-50) !important;
+  stroke-width: 1.25px !important;
+}
+
+.mermaid .er.relationshipLabel rect,
+.mermaid-preview .er.relationshipLabel rect {
+  fill: var(--background-primary) !important;
+  stroke: none !important;
+}
+
+/* ─── Journey / Mindmap / misc ───────────────────────────────────────────────── */
+
+/* Pie chart */
+.mermaid .pieTitleText,
+.mermaid-preview .pieTitleText {
+  fill: var(--text-muted) !important;
+}
+
+.mermaid .slice,
+.mermaid-preview .slice {
+  stroke: var(--background-primary) !important;
+  stroke-width: 2px !important;
+}
+
+/* Journey */
+.mermaid .label-box rect,
+.mermaid-preview .label-box rect {
+  fill: var(--color-base-20) !important;
+  stroke: var(--color-base-40) !important;
+}
+
+.mermaid .task-state,
+.mermaid-preview .task-state {
+  fill: var(--color-base-30) !important;
+}
+
+/* ─── Dark mode explicit overrides ──────────────────────────────────────────── */
 /*
- * A discreet expand icon that appears on diagram hover.
- * The plugin JS (if added later) injects a <button class="slick-mermaid-expand">
- * into each diagram wrapper. This CSS positions and styles it.
- * CSS-snippet-only mode: button won't exist yet — these rules are inert until
- * the JS layer is added.
+ * baseline's .theme-dark flips the --color-base-* scale automatically.
+ * Most rules above inherit correctly. These handle edge cases where
+ * dark-mode contrast needs a nudge.
  */
 
-.slick-mermaid-wrapper {
-  position: relative;
+.theme-dark .mermaid .node rect,
+.theme-dark .mermaid .node circle,
+.theme-dark .mermaid .node ellipse,
+.theme-dark .mermaid .node polygon,
+.theme-dark .mermaid .node path,
+.theme-dark .mermaid .label-container,
+.theme-dark .mermaid-preview .node rect,
+.theme-dark .mermaid-preview .node circle,
+.theme-dark .mermaid-preview .node ellipse,
+.theme-dark .mermaid-preview .node polygon,
+.theme-dark .mermaid-preview .node path,
+.theme-dark .mermaid-preview .label-container {
+  stroke: var(--color-base-35) !important;
 }
 
-.slick-mermaid-expand {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 150ms ease;
-  background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--radius-s);
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 12px;
-  z-index: 10;
-}
-
-.slick-mermaid-wrapper:hover .slick-mermaid-expand {
-  opacity: 1;
-}
-
-.slick-mermaid-expand:hover {
-  color: var(--text-normal);
-  border-color: var(--background-modifier-border-hover);
-}
-
-/* ─── Dark mode ──────────────────────────────────────────────────────────────── */
-/*
- * baseline's .theme-dark overrides --color-base-* automatically.
- * All our variable mappings above inherit from those — no separate dark block
- * needed. This section exists for any properties that need explicit dark values.
- */
-
-.theme-dark .mermaid svg,
-.theme-dark .mermaid-preview svg {
-  /* Slightly softer border in dark — base-30 is too faint at dark lightness levels */
-  --primaryBorderColor: var(--color-base-35);
-  --nodeBorder:         var(--color-base-35);
+.theme-dark .mermaid .cluster rect,
+.theme-dark .mermaid-preview .cluster rect {
+  stroke: var(--color-base-35) !important;
 }
