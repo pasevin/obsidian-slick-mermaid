@@ -12,10 +12,26 @@ Slick Mermaid makes Obsidian diagrams feel native to a dark, typography-first wo
 
 ## Install
 
-1. Build the plugin: `npm install && npm run build`
-2. Copy `main.js`, `manifest.json`, and `styles.css` into `<vault>/.obsidian/plugins/slick-mermaid/`
-3. Open Obsidian → **Settings → Community plugins**
-4. Enable **Slick Mermaid**
+### Community Plugins
+
+Once accepted into the Obsidian Community Plugins directory:
+
+1. Open Obsidian → **Settings → Community plugins**.
+2. Browse for **Slick Mermaid**.
+3. Install and enable the plugin.
+
+### Manual Install
+
+1. Download the latest release assets: `main.js`, `manifest.json`, and `styles.css`.
+2. Copy them into `<vault>/.obsidian/plugins/slick-mermaid/`.
+3. Open Obsidian → **Settings → Community plugins**.
+4. Enable **Slick Mermaid**.
+
+### Development Install
+
+1. Clone the repo.
+2. Run `npm install && npm run build`.
+3. Copy `main.js`, `manifest.json`, and `styles.css` into `<vault>/.obsidian/plugins/slick-mermaid/`.
 
 Done. All Mermaid diagrams in the vault will use the new theme.
 

@@ -14,7 +14,7 @@
     "diagrams",
     "theme"
   ],
-  "author": "ghost",
+  "author": "pasevin",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.11.0",
