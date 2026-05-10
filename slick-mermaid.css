@@ -1,0 +1,239 @@
+/*
+ * obsidian-slick-mermaid
+ * Minimal, monotone Mermaid theme for Obsidian — designed for the baseline theme.
+ * Drop this file into: <vault>/.obsidian/snippets/slick-mermaid.css
+ * Then enable it in Settings → Appearance → CSS Snippets.
+ *
+ * Works in both light and dark mode. Inherits all color tokens from baseline.
+ * No configuration required.
+ */
+
+/* ─── Core Mermaid variable overrides ──────────────────────────────────────── */
+/*
+ * Mermaid's "base" theme exposes these CSS variables on the SVG root.
+ * We override them via the .mermaid wrapper which Obsidian renders into.
+ * Both .mermaid (Live Preview) and .mermaid-preview (Reading Mode) are targeted.
+ */
+
+.mermaid,
+.mermaid-preview {
+  /* Diagram background — transparent so the note background shows through */
+  --mermaid-bg: transparent;
+}
+
+/* Target the SVG itself — this is where Mermaid reads its theme vars */
+.mermaid svg,
+.mermaid-preview svg {
+  /* ── Base palette ──────────────────────────────────────────────────── */
+  --primaryColor:         var(--color-base-20);
+  --primaryTextColor:     var(--text-normal);
+  --primaryBorderColor:   var(--color-base-40);
+  --secondaryColor:       var(--color-base-10);
+  --secondaryTextColor:   var(--text-muted);
+  --secondaryBorderColor: var(--color-base-30);
+  --tertiaryColor:        var(--color-base-10);
+  --tertiaryTextColor:    var(--text-muted);
+  --tertiaryBorderColor:  var(--color-base-30);
+
+  /* ── Canvas + fills ────────────────────────────────────────────────── */
+  --background:           transparent;
+  --mainBkg:              var(--color-base-20);
+  --nodeBorder:           var(--color-base-40);
+  --clusterBkg:           var(--color-base-10);
+  --clusterBorder:        var(--color-base-30);
+  --titleColor:           var(--text-muted);
+  --edgeLabelBackground:  var(--background-primary);
+
+  /* ── Lines + edges ─────────────────────────────────────────────────── */
+  --lineColor:            var(--color-base-50);
+  --arrowheadColor:       var(--color-base-50);
+
+  /* ── Typography ────────────────────────────────────────────────────── */
+  --fontFamily:           "Geist", var(--font-text-theme, "Inter"), ui-sans-serif, sans-serif;
+  --fontSize:             13px;
+  --labelBackground:      var(--background-primary);
+  --labelTextColor:       var(--text-normal);
+
+  /* ── Special diagram types ─────────────────────────────────────────── */
+  /* Sequence diagrams */
+  --actorBkg:             var(--color-base-20);
+  --actorBorder:          var(--color-base-40);
+  --actorTextColor:       var(--text-normal);
+  --actorLineColor:       var(--color-base-40);
+  --signalColor:          var(--text-muted);
+  --signalTextColor:      var(--text-normal);
+  --sequenceNumberColor:  var(--background-primary);
+  --activationBorderColor: var(--color-base-50);
+  --activationBkgColor:   var(--color-base-30);
+  --noteBkgColor:         var(--color-base-20);
+  --noteTextColor:        var(--text-muted);
+  --noteBorderColor:      var(--color-base-40);
+  --loopTextColor:        var(--text-muted);
+
+  /* Gantt */
+  --section0:             var(--color-base-10);
+  --section1:             var(--color-base-20);
+  --sectionBkgColor:      var(--color-base-10);
+  --altSectionBkgColor:   var(--color-base-00);
+  --gridColor:            var(--color-base-30);
+  --todayLineColor:       var(--color-accent);
+  --taskBkgColor:         var(--color-base-30);
+  --taskBorderColor:      var(--color-base-40);
+  --taskTextColor:        var(--text-normal);
+  --taskTextOutsideColor: var(--text-muted);
+  --taskTextClickableColor: var(--text-normal);
+  --activeTaskBkgColor:   var(--color-base-40);
+  --activeTaskBorderColor: var(--color-base-50);
+  --doneTaskBkgColor:     var(--color-base-20);
+  --doneTaskBorderColor:  var(--color-base-30);
+  --critBkgColor:         var(--color-base-30);
+  --critBorderColor:      var(--color-base-50);
+  --critTextColor:        var(--text-normal);
+  --taskTextLightColor:   var(--text-muted);
+
+  /* Git graph */
+  --git0:                 var(--color-base-50);
+  --git1:                 var(--color-base-40);
+  --git2:                 var(--color-base-60);
+  --git3:                 var(--color-base-35);
+  --git4:                 var(--color-base-70);
+  --git5:                 var(--color-base-30);
+  --git6:                 var(--color-base-50);
+  --git7:                 var(--color-base-40);
+  --gitBranchLabel0:      var(--background-primary);
+  --gitBranchLabel1:      var(--background-primary);
+  --gitInvLabel0:         var(--text-normal);
+  --gitInvLabel1:         var(--text-normal);
+}
+
+/* ─── Fit-to-container ──────────────────────────────────────────────────────── */
+/*
+ * Scale the SVG to fill the full content width.
+ * height: auto preserves aspect ratio. max-width: 100% prevents overflow.
+ * The wrapper also gets a clean reset — no extra padding from Obsidian defaults.
+ */
+
+.mermaid,
+.mermaid-preview {
+  width: 100%;
+  overflow: visible;
+  margin: 1.25em 0;
+}
+
+.mermaid svg,
+.mermaid-preview svg {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+  display: block;
+}
+
+/* ─── Typography cleanup ─────────────────────────────────────────────────────── */
+/*
+ * Force font inheritance into the SVG text elements.
+ * Mermaid renders these as <text> elements — the font-family var above sets the
+ * CSS variable but we also need to target the rendered elements directly.
+ */
+
+.mermaid text,
+.mermaid-preview text,
+.mermaid .label,
+.mermaid-preview .label {
+  font-family: "Geist", var(--font-text-theme, "Inter"), ui-sans-serif, sans-serif !important;
+}
+
+/* ─── Node shape refinements ─────────────────────────────────────────────────── */
+/*
+ * Remove any drop shadows Mermaid injects via filter attributes.
+ * Thin down stroke weights for a cleaner look.
+ */
+
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node polygon,
+.mermaid .node path,
+.mermaid-preview .node rect,
+.mermaid-preview .node circle,
+.mermaid-preview .node ellipse,
+.mermaid-preview .node polygon,
+.mermaid-preview .node path {
+  filter: none !important;
+  stroke-width: 1px !important;
+}
+
+/* Cluster / subgraph borders */
+.mermaid .cluster rect,
+.mermaid-preview .cluster rect {
+  stroke-width: 1px !important;
+  stroke-dasharray: 4 2 !important;
+  filter: none !important;
+}
+
+/* Edge lines */
+.mermaid .edgePath path,
+.mermaid-preview .edgePath path {
+  stroke-width: 1.25px !important;
+}
+
+/* Arrowheads */
+.mermaid marker path,
+.mermaid-preview marker path {
+  stroke-width: 1px !important;
+}
+
+/* ─── Fullscreen trigger ─────────────────────────────────────────────────────── */
+/*
+ * A discreet expand icon that appears on diagram hover.
+ * The plugin JS (if added later) injects a <button class="slick-mermaid-expand">
+ * into each diagram wrapper. This CSS positions and styles it.
+ * CSS-snippet-only mode: button won't exist yet — these rules are inert until
+ * the JS layer is added.
+ */
+
+.slick-mermaid-wrapper {
+  position: relative;
+}
+
+.slick-mermaid-expand {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 12px;
+  z-index: 10;
+}
+
+.slick-mermaid-wrapper:hover .slick-mermaid-expand {
+  opacity: 1;
+}
+
+.slick-mermaid-expand:hover {
+  color: var(--text-normal);
+  border-color: var(--background-modifier-border-hover);
+}
+
+/* ─── Dark mode ──────────────────────────────────────────────────────────────── */
+/*
+ * baseline's .theme-dark overrides --color-base-* automatically.
+ * All our variable mappings above inherit from those — no separate dark block
+ * needed. This section exists for any properties that need explicit dark values.
+ */
+
+.theme-dark .mermaid svg,
+.theme-dark .mermaid-preview svg {
+  /* Slightly softer border in dark — base-30 is too faint at dark lightness levels */
+  --primaryBorderColor: var(--color-base-35);
+  --nodeBorder:         var(--color-base-35);
+}
