@@ -1,0 +1,10 @@
+{
+  "id": "slick-mermaid",
+  "name": "Slick Mermaid",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Minimal, monotone Mermaid diagrams with a larger pan / zoom viewer. Designed for the baseline theme.",
+  "author": "ghost",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
