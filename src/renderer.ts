@@ -2,6 +2,7 @@ import { App } from "obsidian";
 import { applyTheme } from "./svg-theme";
 import { MermaidTheme } from "./theme";
 import { mountFullscreenButton } from "./fullscreen";
+import { normalizeMermaidSource } from "./source-normalizer";
 
 interface MermaidRenderResult {
   svg: string;
@@ -51,7 +52,11 @@ export const renderMermaidBlock = async (
   const renderHost = document.createElement("div");
 
   try {
-    const result = await mermaid.render(makeRenderId(), source, renderHost);
+    const result = await mermaid.render(
+      makeRenderId(),
+      normalizeMermaidSource(source),
+      renderHost,
+    );
     const svg = parseSvg(result.svg);
     if (!svg) {
       host.setText("Slick Mermaid: Mermaid returned invalid SVG.");

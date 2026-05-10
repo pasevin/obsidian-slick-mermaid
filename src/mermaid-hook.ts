@@ -1,4 +1,5 @@
 import { MermaidTheme } from "./theme";
+import { normalizeMermaidSource } from "./source-normalizer";
 
 /**
  * Obsidian bundles a single Mermaid instance and exposes it as `window.mermaid`.
@@ -13,6 +14,11 @@ import { MermaidTheme } from "./theme";
 
 interface MermaidLike {
   initialize: (config: Record<string, unknown>) => void;
+  render: (
+    id: string,
+    source: string,
+    container?: Element,
+  ) => unknown;
   __slickMermaidPatched?: boolean;
   __slickMermaidLastConfig?: Record<string, unknown>;
 }
@@ -85,6 +91,7 @@ export const patchMermaid = (getTheme: () => MermaidTheme): (() => void) => {
   }
 
   const original = mermaid.initialize.bind(mermaid);
+  const originalRender = mermaid.render.bind(mermaid);
   mermaid.__slickMermaidPatched = true;
 
   const merged = (incoming: Record<string, unknown>): void => {
@@ -100,6 +107,8 @@ export const patchMermaid = (getTheme: () => MermaidTheme): (() => void) => {
   };
 
   mermaid.initialize = merged as MermaidLike["initialize"];
+  mermaid.render = ((id, source, container) =>
+    originalRender(id, normalizeMermaidSource(source), container)) as MermaidLike["render"];
 
   // Force an immediate re-init so any future renders pick up our theme.
   merged({});
@@ -108,6 +117,7 @@ export const patchMermaid = (getTheme: () => MermaidTheme): (() => void) => {
     if (mermaid.initialize === merged) {
       mermaid.initialize = original;
     }
+    mermaid.render = originalRender;
     mermaid.__slickMermaidPatched = false;
   };
 };
