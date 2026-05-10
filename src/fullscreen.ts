@@ -18,8 +18,7 @@ interface PanZoomState {
 
 const MIN_SCALE = 0.25;
 const MAX_SCALE = 6;
-const INITIAL_ZOOM_BOOST = 1.45;
-const MIN_INITIAL_SCALE = 1;
+const FIT_PADDING = 0.92;
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -64,7 +63,7 @@ class FullscreenSvgModal extends Modal {
     });
     header.createDiv({
       cls: "slick-mermaid-fs-hint",
-      text: "Drag to pan | Wheel to zoom | Esc to close",
+      text: "Drag to pan | Wheel to zoom | Double-click to fit | Esc to close",
     });
 
     const stage = this.contentEl.createDiv({ cls: "slick-mermaid-fs-stage" });
@@ -138,11 +137,7 @@ class FullscreenSvgModal extends Modal {
       stageRect.height / size.height,
     );
     const state: PanZoomState = {
-      scale: clamp(
-        Math.max(fitScale * INITIAL_ZOOM_BOOST, MIN_INITIAL_SCALE),
-        MIN_SCALE,
-        MAX_SCALE,
-      ),
+      scale: clamp(fitScale * FIT_PADDING, MIN_SCALE, MAX_SCALE),
       x: 0,
       y: 0,
     };
