@@ -20,6 +20,12 @@ const MARKER_SELECTORS = [".marker", ".marker.cross", ".arrowMarkerPath", ".arro
 
 const EDGE_LABEL_BG_SELECTORS = [".edgeLabel rect", ".labelBkg", ".cluster-label rect"].join(",");
 
+const ER_ENTITY_SELECTORS = [".er.entityBox"].join(",");
+
+const ER_ATTRIBUTE_ODD_SELECTORS = [".er.attributeBoxOdd"].join(",");
+
+const ER_ATTRIBUTE_EVEN_SELECTORS = [".er.attributeBoxEven"].join(",");
+
 const isSvgElement = (el: Element): el is SVGElement =>
   el instanceof SVGElement;
 
@@ -50,6 +56,21 @@ const themeClusters = (svg: SVGSVGElement, theme: MermaidTheme): void => {
   svg.querySelectorAll(CLUSTER_SELECTORS).forEach((el) => {
     setSvgFill(el, theme.clusterFill);
     setSvgStroke(el, theme.clusterStroke, "1");
+  });
+};
+
+const themeErTables = (svg: SVGSVGElement, theme: MermaidTheme): void => {
+  svg.querySelectorAll(ER_ENTITY_SELECTORS).forEach((el) => {
+    setSvgFill(el, theme.nodeFill);
+    setSvgStroke(el, theme.nodeStroke, "1");
+  });
+  svg.querySelectorAll(ER_ATTRIBUTE_ODD_SELECTORS).forEach((el) => {
+    setSvgFill(el, theme.nodeFill);
+    setSvgStroke(el, theme.nodeStroke, "1");
+  });
+  svg.querySelectorAll(ER_ATTRIBUTE_EVEN_SELECTORS).forEach((el) => {
+    setSvgFill(el, theme.clusterFill);
+    setSvgStroke(el, theme.nodeStroke, "1");
   });
 };
 
@@ -124,6 +145,7 @@ const rewriteInternalStyle = (svg: SVGSVGElement, theme: MermaidTheme): void => 
 export const applyTheme = (svg: SVGSVGElement, theme: MermaidTheme): SVGSVGElement => {
   themeShapes(svg, theme);
   themeClusters(svg, theme);
+  themeErTables(svg, theme);
   themeEdges(svg, theme);
   themeEdgeLabels(svg, theme);
   themeText(svg, theme);

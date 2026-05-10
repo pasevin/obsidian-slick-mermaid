@@ -44,6 +44,13 @@ const buildThemeVariables = (theme: MermaidTheme): Record<string, string> => ({
   noteBkgColor: theme.clusterFill,
   noteBorderColor: theme.nodeStroke,
   noteTextColor: theme.textColor,
+  // ER diagrams render table-like attribute rows with dedicated variables.
+  entityBkg: theme.nodeFill,
+  entityBorder: theme.nodeStroke,
+  attributeBackgroundColorOdd: theme.nodeFill,
+  attributeBackgroundColorEven: theme.clusterFill,
+  attributeBorderColor: theme.nodeStroke,
+  relationshipColor: theme.edgeStroke,
 });
 
 const buildConfig = (theme: MermaidTheme): Record<string, unknown> => ({
