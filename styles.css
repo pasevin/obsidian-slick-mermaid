@@ -1,0 +1,137 @@
+/*
+ * Slick Mermaid — plugin styles
+ *
+ * SVG fills/strokes are applied via JS in src/svg-theme.ts (CSS can't reliably
+ * override Mermaid's inline <style> in Live Preview). This stylesheet only
+ * handles layout, container behavior, and the fullscreen modal.
+ */
+
+/* ─── Container: keep diagrams centered, never overflow horizontally ───── */
+
+.mermaid,
+.mermaid-preview {
+  margin: 1.25em 0;
+  background: transparent;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+
+/* Don't force-scale the SVG. Chromium clips foreignObject HTML labels when an
+ * ancestor SVG is CSS-scaled, even if the viewBox is unchanged. We keep the
+ * intrinsic SVG dimensions and let the parent scroll horizontally for wide
+ * diagrams. The fullscreen viewer is the answer for very wide diagrams. */
+.mermaid svg,
+.mermaid-preview svg {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 100%;
+  height: auto;
+  filter: none !important;
+}
+
+/* ─── Fullscreen affordance ─────────────────────────────────────────────── */
+
+.slick-mermaid-host {
+  position: relative;
+}
+
+.slick-mermaid-host:hover .slick-mermaid-fs-btn,
+.slick-mermaid-host:focus-within .slick-mermaid-fs-btn {
+  opacity: 1;
+}
+
+.slick-mermaid-fs-btn {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(2px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    color 120ms ease,
+    background 120ms ease;
+  z-index: 2;
+}
+
+.slick-mermaid-fs-btn:hover,
+.slick-mermaid-fs-btn:focus-visible {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Fullscreen modal ──────────────────────────────────────────────────── */
+
+.modal.slick-mermaid-fs-modal {
+  width: 96vw;
+  height: 92vh;
+  max-width: none;
+  max-height: none;
+}
+
+.modal.slick-mermaid-fs-modal .modal-content {
+  height: 100%;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.slick-mermaid-fs-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.slick-mermaid-fs-title {
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.slick-mermaid-fs-hint {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.slick-mermaid-fs-stage {
+  width: 100%;
+  height: calc(100% - 40px);
+  position: relative;
+  background: var(--background-primary);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.slick-mermaid-fs-stage.is-panning {
+  cursor: grabbing;
+}
+
+.slick-mermaid-fs-stage svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  max-width: none;
+  max-height: none;
+  height: auto;
+  transform-origin: 0 0;
+  will-change: transform;
+  filter: none !important;
+}

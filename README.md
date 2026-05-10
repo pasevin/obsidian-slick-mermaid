@@ -1,17 +1,17 @@
-# obsidian-slick-mermaid
+# Slick Mermaid
 
-Minimal, monotone Mermaid CSS theme for Obsidian — designed for the [baseline](https://github.com/aaaaalexis/obsidian-baseline) theme.
+Minimal, monotone Mermaid plugin for Obsidian — designed for the [baseline](https://github.com/aaaaalexis/obsidian-baseline) theme.
 
-Diagrams fit the content width by default. Monotone palette derived entirely from baseline's CSS variable system. No configuration required.
+Diagrams use baseline / Obsidian theme tokens, disable baseline's Mermaid invert filter, and include a larger-view dialog for reading wide diagrams.
 
 ---
 
 ## Install
 
-1. Download `slick-mermaid.css`
-2. Copy it into your vault's snippets folder: `<vault>/.obsidian/snippets/`
-3. Open Obsidian → **Settings → Appearance → CSS Snippets**
-4. Enable **slick-mermaid**
+1. Build the plugin: `npm install && npm run build`
+2. Copy `main.js`, `manifest.json`, and `styles.css` into `<vault>/.obsidian/plugins/slick-mermaid/`
+3. Open Obsidian → **Settings → Community plugins**
+4. Enable **Slick Mermaid**
 
 Done. All Mermaid diagrams in the vault will use the new theme.
 
@@ -19,15 +19,15 @@ Done. All Mermaid diagrams in the vault will use the new theme.
 
 ## What it does
 
-- Maps baseline's `--color-base-*` token scale onto Mermaid's theme variables
-- All diagram types covered: flowcharts, sequence, Gantt, git graph, ER, state
-- SVGs scale to fill the full content width — no horizontal scroll, no clipping
-- Thin strokes, no drop shadows, Geist font throughout
-- Adapts automatically to light and dark mode via baseline's CSS variables
+- Maps Obsidian / baseline CSS variables onto Mermaid theme variables
+- Patches Mermaid rendering so diagrams are themed at first paint
+- Disables baseline's Mermaid SVG invert filter (`invert(1) hue-rotate(180deg) saturate(1.25)`)
+- Keeps Mermaid SVGs at intrinsic size to avoid clipped `foreignObject` labels
+- Adds an expand button and double-click shortcut for a larger pan / zoom dialog
+- Adapts automatically to light and dark mode via Obsidian CSS variables
 
-## What it doesn't do (yet)
+## What it doesn't do yet
 
-- Fullscreen / pan / zoom — that requires the JS plugin layer (coming)
 - Per-diagram overrides
 - Support for themes other than baseline
 
@@ -43,7 +43,6 @@ Tested with:
 
 ## Roadmap
 
-- [ ] JS plugin layer: fullscreen dialog, pan, zoom
 - [ ] Style Settings integration for color overrides
 - [ ] PNG/SVG export from fullscreen dialog
 
