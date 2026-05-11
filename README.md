@@ -12,6 +12,16 @@ Slick Mermaid makes Obsidian diagrams feel native to your workspace: subdued sur
 
 ![Slick Mermaid light theme class diagram](assets/slick-mermaid-light-class.png)
 
+## Demo Videos
+
+Light mode:
+
+<video src="assets/slick-mermaid-light.mp4" controls width="100%"></video>
+
+Dark mode:
+
+<video src="assets/slick-mermaid-dark.mp4" controls width="100%"></video>
+
 ---
 
 ## Install
