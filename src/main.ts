@@ -13,7 +13,7 @@ export default class SlickMermaidPlugin extends Plugin {
   private unpatchMermaid?: () => void;
   private cachedTheme: MermaidTheme = readTheme();
 
-  async onload(): Promise<void> {
+  onload(): void {
     this.refreshTheme();
 
     // Hook Mermaid so future renders come out themed natively. This is the

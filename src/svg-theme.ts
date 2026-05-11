@@ -31,16 +31,16 @@ const isSvgElement = (el: Element): el is SVGElement =>
 
 const setSvgFill = (el: Element, color: string): void => {
   if (!isSvgElement(el)) return;
-  el.style.setProperty("fill", color, "important");
+  el.setCssProps({ fill: color });
   el.setAttribute("fill", color);
 };
 
 const setSvgStroke = (el: Element, color: string, width?: string): void => {
   if (!isSvgElement(el)) return;
-  el.style.setProperty("stroke", color, "important");
+  el.setCssProps({ stroke: color });
   el.setAttribute("stroke", color);
   if (width !== undefined) {
-    el.style.setProperty("stroke-width", width, "important");
+    el.setCssProps({ "stroke-width": width });
     el.setAttribute("stroke-width", width);
   }
 };
@@ -77,8 +77,10 @@ const themeErTables = (svg: SVGSVGElement, theme: MermaidTheme): void => {
 const themeEdges = (svg: SVGSVGElement, theme: MermaidTheme): void => {
   svg.querySelectorAll(EDGE_PATH_SELECTORS).forEach((el) => {
     if (!isSvgElement(el)) return;
-    el.style.setProperty("stroke", theme.edgeStroke, "important");
-    el.style.setProperty("fill", "none", "important");
+    el.setCssProps({
+      stroke: theme.edgeStroke,
+      fill: "none",
+    });
     el.setAttribute("stroke", theme.edgeStroke);
     el.setAttribute("fill", "none");
   });
@@ -91,19 +93,21 @@ const themeEdges = (svg: SVGSVGElement, theme: MermaidTheme): void => {
 const themeEdgeLabels = (svg: SVGSVGElement, theme: MermaidTheme): void => {
   svg.querySelectorAll(EDGE_LABEL_BG_SELECTORS).forEach((el) => {
     setSvgFill(el, theme.edgeLabelBg);
-    if (isSvgElement(el)) el.style.setProperty("opacity", "1", "important");
+    if (isSvgElement(el)) el.setCssProps({ opacity: "1" });
   });
 };
 
 const themeText = (svg: SVGSVGElement, theme: MermaidTheme): void => {
   svg.querySelectorAll<SVGTextElement>("text, tspan").forEach((el) => {
-    el.style.setProperty("fill", theme.textColor, "important");
+    el.setCssProps({ fill: theme.textColor });
     el.setAttribute("fill", theme.textColor);
   });
   svg.querySelectorAll<HTMLElement>("foreignObject *").forEach((el) => {
-    el.style.setProperty("color", theme.textColor, "important");
-    el.style.setProperty("background", "transparent", "important");
-    el.style.setProperty("background-color", "transparent", "important");
+    el.setCssProps({
+      color: theme.textColor,
+      background: "transparent",
+      "background-color": "transparent",
+    });
   });
 };
 

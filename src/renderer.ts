@@ -30,9 +30,11 @@ const makeRenderId = (): string => {
 };
 
 const parseSvg = (svgText: string): SVGSVGElement | null => {
-  const template = document.createElement("template");
-  template.innerHTML = svgText.trim();
-  const svg = template.content.querySelector("svg");
+  const document = new DOMParser().parseFromString(
+    svgText.trim(),
+    "image/svg+xml",
+  );
+  const svg = document.documentElement;
   return svg instanceof SVGSVGElement ? svg : null;
 };
 

@@ -38,7 +38,9 @@ const readDiagramSize = (svg: SVGSVGElement): DiagramSize => {
 };
 
 const applyTransform = (svg: SVGSVGElement, state: PanZoomState): void => {
-  svg.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`;
+  svg.setCssProps({
+    transform: `translate(${state.x}px, ${state.y}px) scale(${state.scale})`,
+  });
 };
 
 class FullscreenSvgModal extends Modal {
@@ -73,10 +75,12 @@ class FullscreenSvgModal extends Modal {
     clone.setAttribute("width", String(size.width));
     clone.setAttribute("height", String(size.height));
     clone.setAttribute("preserveAspectRatio", "xMidYMid meet");
-    clone.style.width = `${size.width}px`;
-    clone.style.height = `${size.height}px`;
-    clone.style.maxWidth = "none";
-    clone.style.maxHeight = "none";
+    clone.setCssProps({
+      width: `${size.width}px`,
+      height: `${size.height}px`,
+      "max-width": "none",
+      "max-height": "none",
+    });
 
     stage.appendChild(clone);
     applyTheme(clone, this.theme);
