@@ -3,7 +3,7 @@ import { MermaidTheme, readTheme } from "./theme";
 import { applyTheme, themeAllVisibleSvgs } from "./svg-theme";
 import { observeSvgs } from "./observer";
 import { mountFullscreenButton } from "./fullscreen";
-import { patchMermaid } from "./mermaid-hook";
+import { loadAndPatchMermaid } from "./mermaid-hook";
 import { renderMermaidBlock } from "./renderer";
 
 const MERMAID_HOST_SELECTORS = [".mermaid", ".mermaid-preview"].join(",");
@@ -12,13 +12,14 @@ export default class SlickMermaidPlugin extends Plugin {
   private observer?: MutationObserver;
   private unpatchMermaid?: () => void;
   private cachedTheme: MermaidTheme = readTheme();
+  private mermaidPatchVersion = 0;
 
   onload(): void {
     this.refreshTheme();
 
     // Hook Mermaid so future renders come out themed natively. This is the
     // primary mechanism — we don't rely on post-render mutation to win.
-    this.unpatchMermaid = patchMermaid(() => this.cachedTheme);
+    void this.refreshMermaidPatch();
 
     this.registerMarkdownCodeBlockProcessor("mermaid", async (source, el) => {
       await renderMermaidBlock(this.app, source, el, () => this.cachedTheme);
@@ -37,8 +38,7 @@ export default class SlickMermaidPlugin extends Plugin {
       this.app.workspace.on("css-change", () => {
         this.refreshTheme();
         // Re-apply Mermaid config so future renders use the new theme.
-        this.unpatchMermaid?.();
-        this.unpatchMermaid = patchMermaid(() => this.cachedTheme);
+        void this.refreshMermaidPatch();
         themeAllVisibleSvgs(this.cachedTheme);
       }),
     );
@@ -51,6 +51,7 @@ export default class SlickMermaidPlugin extends Plugin {
   }
 
   onunload(): void {
+    this.mermaidPatchVersion += 1;
     this.unpatchMermaid?.();
     this.observer?.disconnect();
     document
@@ -67,6 +68,21 @@ export default class SlickMermaidPlugin extends Plugin {
 
   private refreshTheme(): void {
     this.cachedTheme = readTheme();
+  }
+
+  private async refreshMermaidPatch(): Promise<void> {
+    const patchVersion = this.mermaidPatchVersion + 1;
+    this.mermaidPatchVersion = patchVersion;
+    this.unpatchMermaid?.();
+    this.unpatchMermaid = undefined;
+
+    const unpatch = await loadAndPatchMermaid(() => this.cachedTheme);
+    if (patchVersion === this.mermaidPatchVersion) {
+      this.unpatchMermaid = unpatch;
+      return;
+    }
+
+    unpatch();
   }
 
   private themeContainersWithin(root: ParentNode): void {

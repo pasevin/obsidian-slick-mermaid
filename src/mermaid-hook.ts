@@ -1,3 +1,4 @@
+import { loadMermaid } from "obsidian";
 import { MermaidTheme } from "./theme";
 import { normalizeMermaidSource } from "./source-normalizer";
 
@@ -120,4 +121,11 @@ export const patchMermaid = (getTheme: () => MermaidTheme): (() => void) => {
     mermaid.render = originalRender;
     mermaid.__slickMermaidPatched = false;
   };
+};
+
+export const loadAndPatchMermaid = async (
+  getTheme: () => MermaidTheme,
+): Promise<() => void> => {
+  await loadMermaid();
+  return patchMermaid(getTheme);
 };
