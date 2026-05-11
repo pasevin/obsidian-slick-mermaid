@@ -1,5 +1,5 @@
 /**
- * Resolves baseline / Obsidian CSS variables into concrete colors that we can
+ * Resolves Obsidian theme CSS variables into concrete colors that we can
  * stamp directly onto SVG elements. Reading variables once per render lets us
  * apply them as inline `style="fill:..."` and `<style>` text replacements,
  * which is the only reliable path in Live Preview (external CSS doesn't

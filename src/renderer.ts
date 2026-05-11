@@ -1,4 +1,4 @@
-import { App } from "obsidian";
+import { App, loadMermaid } from "obsidian";
 import { applyTheme } from "./svg-theme";
 import { MermaidTheme } from "./theme";
 import { mountFullscreenButton } from "./fullscreen";
@@ -19,9 +19,9 @@ interface MermaidLike {
 
 let renderCounter = 0;
 
-const getMermaid = (): MermaidLike | undefined => {
+const getMermaid = async (): Promise<MermaidLike | undefined> => {
   const w = window as unknown as { mermaid?: MermaidLike };
-  return w.mermaid;
+  return w.mermaid ?? await loadMermaid() as MermaidLike;
 };
 
 const makeRenderId = (): string => {
@@ -44,7 +44,7 @@ export const renderMermaidBlock = async (
   el: HTMLElement,
   getTheme: () => MermaidTheme,
 ): Promise<void> => {
-  const mermaid = getMermaid();
+  const mermaid = await getMermaid();
   if (!mermaid) {
     el.setText("Slick Mermaid: Mermaid is not available on window.");
     return;

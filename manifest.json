@@ -1,9 +1,9 @@
 {
   "id": "slick-mermaid",
   "name": "Slick Mermaid",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minAppVersion": "1.5.0",
-  "description": "Minimal, monotone Mermaid diagrams with a larger pan / zoom viewer. Designed for the baseline theme.",
+  "description": "Minimal, theme-aware Mermaid diagrams with a larger pan / zoom viewer for Obsidian.",
   "author": "pasevin",
   "authorUrl": "https://github.com/pasevin",
   "isDesktopOnly": false

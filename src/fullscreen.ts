@@ -4,6 +4,7 @@ import { MermaidTheme } from "./theme";
 
 const FS_BUTTON_CLASS = "slick-mermaid-fs-btn";
 const FS_BUTTON_FLAG = "data-slick-fs";
+const FS_DBLCLICK_FLAG = "data-slick-fs-dblclick";
 
 interface DiagramSize {
   width: number;
@@ -231,7 +232,13 @@ export const mountFullscreenButton = (
   container: HTMLElement,
   getTheme: () => MermaidTheme,
 ): void => {
-  if (container.getAttribute(FS_BUTTON_FLAG) === "true") return;
+  const existingButton = Array.from(container.children).find((el) =>
+    el.hasClass(FS_BUTTON_CLASS),
+  );
+  if (container.getAttribute(FS_BUTTON_FLAG) === "true" && existingButton) {
+    return;
+  }
+
   container.setAttribute(FS_BUTTON_FLAG, "true");
   container.addClass("slick-mermaid-host");
 
@@ -252,9 +259,12 @@ export const mountFullscreenButton = (
     open();
   });
 
-  container.addEventListener("dblclick", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    open();
-  });
+  if (container.getAttribute(FS_DBLCLICK_FLAG) !== "true") {
+    container.setAttribute(FS_DBLCLICK_FLAG, "true");
+    container.addEventListener("dblclick", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      open();
+    });
+  }
 };

@@ -1,7 +1,7 @@
 {
   "name": "slick-mermaid",
-  "version": "0.1.1",
-  "description": "Minimal, monotone Mermaid diagrams with a larger pan / zoom viewer for Obsidian.",
+  "version": "0.1.2",
+  "description": "Minimal, theme-aware Mermaid diagrams with a larger pan / zoom viewer for Obsidian.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",

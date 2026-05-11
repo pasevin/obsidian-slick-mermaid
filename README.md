@@ -1,12 +1,16 @@
 # Slick Mermaid
 
-Minimal, monotone Mermaid plugin for Obsidian — designed for the [baseline](https://github.com/aaaaalexis/obsidian-baseline) theme.
+Minimal, theme-aware Mermaid plugin for Obsidian — inspired by the [baseline](https://github.com/aaaaalexis/obsidian-baseline) theme's neutral, typography-first aesthetic.
 
-Slick Mermaid makes Obsidian diagrams feel native to a dark, typography-first workspace: subdued surfaces, thin strokes, readable labels, and a larger pan / zoom dialog for complex graphs.
+Slick Mermaid makes Obsidian diagrams feel native to your workspace: subdued surfaces, thin strokes, readable labels, and a larger pan / zoom dialog for complex graphs. It uses standard Obsidian theme variables, so it adapts to light and dark mode and can be used with themes beyond baseline.
 
-![Slick Mermaid inline diagrams](assets/slick-mermaid-inline.png)
+![Slick Mermaid light theme sequence diagram dialog](assets/slick-mermaid-light-dialog.png)
 
-![Slick Mermaid larger dialog](assets/slick-mermaid-dialog.png)
+![Slick Mermaid light theme flow and sequence diagrams](assets/slick-mermaid-light-flow-sequence.png)
+
+![Slick Mermaid light theme git graph and pie chart](assets/slick-mermaid-light-git-pie.png)
+
+![Slick Mermaid light theme class diagram](assets/slick-mermaid-light-class.png)
 
 ---
 
@@ -39,11 +43,11 @@ Done. All Mermaid diagrams in the vault will use the new theme.
 
 ## What it does
 
-### Native Baseline Styling
+### Native Obsidian Styling
 
-- Maps Obsidian / baseline CSS variables onto Mermaid theme variables.
+- Maps Obsidian CSS variables onto Mermaid theme variables.
 - Uses dark monotone fills, thin borders, and readable text instead of Mermaid's bright defaults.
-- Disables baseline's Mermaid SVG invert filter (`invert(1) hue-rotate(180deg) saturate(1.25)`), which otherwise turns correctly themed dark nodes back into light boxes.
+- Disables theme-level Mermaid SVG invert filters when present, including baseline's `invert(1) hue-rotate(180deg) saturate(1.25)`, which otherwise turns correctly themed dark nodes back into light boxes.
 - Adapts automatically to light and dark mode via Obsidian CSS variables.
 
 ### Better Mermaid Compatibility
@@ -63,15 +67,17 @@ Done. All Mermaid diagrams in the vault will use the new theme.
 ## What it doesn't do yet
 
 - Per-diagram overrides
-- Support for themes other than baseline
+- Per-theme presets beyond Obsidian's standard theme variables
 
 ---
 
 ## Compatibility
 
 Tested with:
-- baseline theme (target)
+- baseline theme (primary design reference)
 - Obsidian 1.x
+
+Slick Mermaid should work with most Obsidian themes that expose the standard background, border, and text variables. Visual tuning may vary by theme.
 
 ---
 

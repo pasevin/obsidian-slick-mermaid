@@ -61,6 +61,7 @@ export default class SlickMermaidPlugin extends Plugin {
       .forEach((el) => {
         el.removeClass("slick-mermaid-host");
         el.removeAttribute("data-slick-fs");
+        el.removeAttribute("data-slick-fs-dblclick");
       });
   }
 
