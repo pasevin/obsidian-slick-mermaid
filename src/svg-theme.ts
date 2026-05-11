@@ -19,6 +19,15 @@ const EDGE_PATH_SELECTORS = [".edgePath .path", ".flowchart-link"].join(",");
 const MARKER_SELECTORS = [".marker", ".marker.cross", ".arrowMarkerPath", ".arrowheadPath"].join(",");
 
 const EDGE_LABEL_BG_SELECTORS = [".edgeLabel rect", ".labelBkg", ".cluster-label rect"].join(",");
+const EDGE_LABEL_HTML_SELECTORS = [
+  ".edgeLabel foreignObject .labelBkg",
+  ".edgeLabel foreignObject span.edgeLabel",
+  ".edgeLabel foreignObject span.edgeLabel p",
+].join(",");
+
+const EDGE_LABEL_PADDING_X = 8;
+const EDGE_LABEL_PADDING_Y = 3;
+const EDGE_LABEL_PADDED_FLAG = "data-slick-edge-label-padded";
 
 const ER_ENTITY_SELECTORS = [".er.entityBox"].join(",");
 
@@ -28,6 +37,15 @@ const ER_ATTRIBUTE_EVEN_SELECTORS = [".er.attributeBoxEven"].join(",");
 
 const isSvgElement = (el: Element): el is SVGElement =>
   el instanceof SVGElement;
+
+const readNumericAttribute = (
+  el: Element,
+  attribute: string,
+  fallback: number,
+): number => {
+  const value = Number.parseFloat(el.getAttribute(attribute) ?? "");
+  return Number.isFinite(value) ? value : fallback;
+};
 
 const setSvgFill = (el: Element, color: string): void => {
   if (!isSvgElement(el)) return;
@@ -93,7 +111,47 @@ const themeEdges = (svg: SVGSVGElement, theme: MermaidTheme): void => {
 const themeEdgeLabels = (svg: SVGSVGElement, theme: MermaidTheme): void => {
   svg.querySelectorAll(EDGE_LABEL_BG_SELECTORS).forEach((el) => {
     setSvgFill(el, theme.edgeLabelBg);
-    if (isSvgElement(el)) el.setCssProps({ opacity: "1" });
+    if (isSvgElement(el)) {
+      el.setCssProps({ opacity: "1" });
+      el.setAttribute("rx", "6");
+      el.setAttribute("ry", "6");
+    }
+  });
+
+  svg.querySelectorAll<SVGForeignObjectElement>(".edgeLabel foreignObject").forEach((el) => {
+    if (el.hasAttribute(EDGE_LABEL_PADDED_FLAG)) return;
+
+    const width = readNumericAttribute(el, "width", 0);
+    const height = readNumericAttribute(el, "height", 0);
+    const x = readNumericAttribute(el, "x", 0);
+    const y = readNumericAttribute(el, "y", 0);
+
+    if (width > 0 && height > 0) {
+      el.setAttribute("x", String(x - EDGE_LABEL_PADDING_X));
+      el.setAttribute("y", String(y - EDGE_LABEL_PADDING_Y));
+      el.setAttribute("width", String(width + EDGE_LABEL_PADDING_X * 2));
+      el.setAttribute("height", String(height + EDGE_LABEL_PADDING_Y * 2));
+      el.setAttribute(EDGE_LABEL_PADDED_FLAG, "true");
+    }
+  });
+
+  svg.querySelectorAll<HTMLElement>(EDGE_LABEL_HTML_SELECTORS).forEach((el) => {
+    el.setCssProps({
+      color: theme.textColor,
+      "background-color": theme.edgeLabelBg,
+    });
+  });
+
+  svg.querySelectorAll<HTMLElement>(".edgeLabel foreignObject .labelBkg").forEach((el) => {
+    el.setCssProps({
+      display: "flex",
+      "align-items": "center",
+      "justify-content": "center",
+      width: "100%",
+      height: "100%",
+      "border-radius": "999px",
+      "box-sizing": "border-box",
+    });
   });
 };
 
@@ -151,8 +209,8 @@ export const applyTheme = (svg: SVGSVGElement, theme: MermaidTheme): SVGSVGEleme
   themeClusters(svg, theme);
   themeErTables(svg, theme);
   themeEdges(svg, theme);
-  themeEdgeLabels(svg, theme);
   themeText(svg, theme);
+  themeEdgeLabels(svg, theme);
   rewriteInternalStyle(svg, theme);
   svg.setAttribute(THEMED_FLAG, "true");
   return svg;

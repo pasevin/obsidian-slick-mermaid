@@ -51,7 +51,7 @@ export const renderMermaidBlock = async (
   }
 
   const host = el.createDiv({ cls: "mermaid slick-mermaid-rendered" });
-  const renderHost = document.createElement("div");
+  const renderHost = document.body.createDiv({ cls: "slick-mermaid-measure-host" });
 
   try {
     const result = await mermaid.render(
@@ -76,5 +76,7 @@ export const renderMermaidBlock = async (
       cls: "slick-mermaid-error",
       text: err instanceof Error ? err.message : String(err),
     });
+  } finally {
+    renderHost.remove();
   }
 };

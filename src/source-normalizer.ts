@@ -9,8 +9,21 @@ const needsQuotedLabel = (label: string): boolean => {
   return /[(),]/.test(label);
 };
 
+const normalizeEscapedLineBreaks = (label: string): string =>
+  label.replace(/\\n/g, "<br/>");
+
 const quoteLabel = (label: string): string =>
-  `["${label.replace(/"/g, "#quot;")}"]`;
+  `["${normalizeEscapedLineBreaks(label).replace(/"/g, "#quot;")}"]`;
+
+const normalizeLabel = (label: string): string => {
+  const normalized = normalizeEscapedLineBreaks(label);
+  return needsQuotedLabel(normalized) ? quoteLabel(normalized) : `[${normalized}]`;
+};
+
+const normalizeEdgeLabels = (line: string): string =>
+  line.replace(/\|([^|]*)\|/g, (_match, label: string) =>
+    `|${normalizeEscapedLineBreaks(label)}|`,
+  );
 
 const normalizeFlowchartLine = (line: string): string => {
   let result = "";
@@ -31,11 +44,11 @@ const normalizeFlowchartLine = (line: string): string => {
 
     const label = line.slice(start + 1, end);
     result += line.slice(index, start);
-    result += needsQuotedLabel(label) ? quoteLabel(label) : `[${label}]`;
+    result += normalizeLabel(label);
     index = end + 1;
   }
 
-  return result;
+  return normalizeEdgeLabels(result);
 };
 
 /**
@@ -45,6 +58,11 @@ const normalizeFlowchartLine = (line: string): string => {
  *
  *   A[canTransfer(from, to, amount)]
  *   -> A["canTransfer(from, to, amount)"]
+ *
+ * It also converts escaped newlines inside labels to Mermaid HTML breaks:
+ *
+ *   A["Smart Contracts\n(on-chain events)"]
+ *   -> A["Smart Contracts<br/>(on-chain events)"]
  */
 export const normalizeMermaidSource = (source: string): string => {
   const lines = source.split("\n");

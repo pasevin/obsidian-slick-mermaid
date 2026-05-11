@@ -50,6 +50,7 @@ Done. All Mermaid diagrams in the vault will use the new theme.
 
 - Patches Mermaid rendering so diagrams are themed at first paint.
 - Normalizes common flowchart labels before parsing, so Obsidian accepts labels like `canTransfer(from, to, amount)` without requiring manual quotes.
+- Supports escaped newline labels like `A["Smart Contracts\n(on-chain events)"]`, rendering them as real multiline nodes instead of literal `\n` text.
 - Themes ER diagram table rows (`entityBox`, `attributeBoxOdd`, `attributeBoxEven`) so table-style components do not keep white backgrounds.
 
 ### Larger Diagram Viewer

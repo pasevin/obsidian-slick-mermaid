@@ -30,6 +30,14 @@
   filter: none !important;
 }
 
+.slick-mermaid-measure-host {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* ─── Fullscreen affordance ─────────────────────────────────────────────── */
 
 .slick-mermaid-host {
