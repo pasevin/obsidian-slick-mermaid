@@ -1,11 +1,8 @@
 import { applyTheme } from "./svg-theme";
 import { MermaidTheme } from "./theme";
 
-const THEMED_ATTR = "data-slick-themed";
-
 const isMermaidSvg = (el: Element): el is SVGSVGElement => {
   if (!(el instanceof SVGSVGElement)) return false;
-  if (el.getAttribute(THEMED_ATTR) === "true") return false;
   if (!el.hasAttribute("aria-roledescription")) return false;
   return Boolean(el.closest(".mermaid, .mermaid-preview"));
 };
@@ -16,6 +13,11 @@ const isMermaidSvg = (el: Element): el is SVGSVGElement => {
  * Important: Mermaid blocks can contain other SVGs owned by Obsidian or our
  * controls (for example Lucide icons). Only SVGs with Mermaid's
  * `aria-roledescription` should be themed.
+ *
+ * Already-themed SVGs are intentionally reprocessed when inserted. Obsidian can
+ * virtualize preview content, detach a themed diagram, and reattach it after a
+ * theme switch; those diagrams need the current theme even if they still carry
+ * `data-slick-themed`.
  */
 export const observeSvgs = (
   getTheme: () => MermaidTheme,

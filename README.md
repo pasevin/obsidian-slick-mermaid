@@ -1,8 +1,8 @@
 # Slick Mermaid
 
-Minimal, theme-aware Mermaid plugin for Obsidian — inspired by the [baseline](https://github.com/aaaaalexis/obsidian-baseline) theme's neutral, typography-first aesthetic.
+Opinionated, minimal, theme-adaptive Mermaid diagrams for Obsidian.
 
-Slick Mermaid makes Obsidian diagrams feel native to your workspace: subdued surfaces, thin strokes, readable labels, and a larger pan / zoom dialog for complex graphs. It uses standard Obsidian theme variables, so it adapts to light and dark mode and can be used with themes beyond baseline.
+Slick Mermaid makes Mermaid diagrams feel native to whatever Obsidian theme you use. It reads the active theme's background, border, and text colors, matches diagram surfaces to the surrounding note, and adds subtle contrast so nodes and groups stay readable in both light and dark mode.
 
 ![Slick Mermaid light theme sequence diagram dialog](assets/slick-mermaid-light-dialog.png)
 
@@ -50,10 +50,11 @@ Done. All Mermaid diagrams in the vault will use the new theme.
 
 ### Native Obsidian Styling
 
-- Maps Obsidian CSS variables onto Mermaid theme variables.
-- Uses dark monotone fills, thin borders, and readable text instead of Mermaid's bright defaults.
-- Disables theme-level Mermaid SVG invert filters when present, including baseline's `invert(1) hue-rotate(180deg) saturate(1.25)`, which otherwise turns correctly themed dark nodes back into light boxes.
-- Adapts automatically to light and dark mode via Obsidian CSS variables.
+- Adapts Mermaid diagrams to the active Obsidian theme using standard theme variables.
+- Matches large diagram wrappers to the surrounding note surface, then adds subtle variation for nodes, borders, and edge-label pills.
+- Neutralizes Mermaid's explicit `style` / `classDef` colors so diagrams stay cohesive across themes.
+- Re-themes visible and virtualized diagrams after theme switches, without needing an Obsidian restart.
+- Disables theme-level Mermaid SVG invert filters when present, so correctly themed diagrams are not visually inverted.
 
 ### Better Mermaid Compatibility
 
@@ -79,10 +80,10 @@ Done. All Mermaid diagrams in the vault will use the new theme.
 ## Compatibility
 
 Tested with:
-- baseline theme (primary design reference)
+- Multiple light and dark Obsidian themes
 - Obsidian 1.x
 
-Slick Mermaid should work with most Obsidian themes that expose the standard background, border, and text variables. Visual tuning may vary by theme.
+Slick Mermaid should work with most Obsidian themes that expose the standard background, border, and text variables. It is no longer tuned for a single theme; the goal is to make Mermaid feel native wherever it is rendered.
 
 ---
 

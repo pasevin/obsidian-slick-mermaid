@@ -13,6 +13,8 @@ export default class SlickMermaidPlugin extends Plugin {
   private unpatchMermaid?: () => void;
   private cachedTheme: MermaidTheme = readTheme();
   private mermaidPatchVersion = 0;
+  private themeRefreshFrame?: number;
+  private themeRefreshTimers: number[] = [];
 
   onload(): void {
     this.refreshTheme();
@@ -36,10 +38,7 @@ export default class SlickMermaidPlugin extends Plugin {
 
     this.registerEvent(
       this.app.workspace.on("css-change", () => {
-        this.refreshTheme();
-        // Re-apply Mermaid config so future renders use the new theme.
-        void this.refreshMermaidPatch();
-        themeAllVisibleSvgs(this.cachedTheme);
+        this.scheduleThemeRefresh();
       }),
     );
 
@@ -52,6 +51,7 @@ export default class SlickMermaidPlugin extends Plugin {
 
   onunload(): void {
     this.mermaidPatchVersion += 1;
+    this.clearScheduledThemeRefresh();
     this.unpatchMermaid?.();
     this.observer?.disconnect();
     document
@@ -68,6 +68,43 @@ export default class SlickMermaidPlugin extends Plugin {
 
   private refreshTheme(): void {
     this.cachedTheme = readTheme();
+  }
+
+  private refreshRenderedDiagrams(repatchMermaid: boolean): void {
+    this.refreshTheme();
+    if (repatchMermaid) {
+      // Re-apply Mermaid config so future renders use the new theme.
+      void this.refreshMermaidPatch();
+    }
+    themeAllVisibleSvgs(this.cachedTheme);
+    this.themeContainersWithin(document.body);
+  }
+
+  private clearScheduledThemeRefresh(): void {
+    if (this.themeRefreshFrame !== undefined) {
+      window.cancelAnimationFrame(this.themeRefreshFrame);
+      this.themeRefreshFrame = undefined;
+    }
+    this.themeRefreshTimers.forEach((timer) => window.clearTimeout(timer));
+    this.themeRefreshTimers = [];
+  }
+
+  private scheduleThemeRefresh(): void {
+    this.clearScheduledThemeRefresh();
+
+    this.refreshRenderedDiagrams(true);
+    this.themeRefreshFrame = window.requestAnimationFrame(() => {
+      this.themeRefreshFrame = undefined;
+      this.refreshRenderedDiagrams(false);
+    });
+
+    [50, 150, 400, 1000].forEach((delay, index) => {
+      const timer = window.setTimeout(() => {
+        this.themeRefreshTimers = this.themeRefreshTimers.filter((value) => value !== timer);
+        this.refreshRenderedDiagrams(index === 3);
+      }, delay);
+      this.themeRefreshTimers.push(timer);
+    });
   }
 
   private async refreshMermaidPatch(): Promise<void> {

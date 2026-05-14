@@ -1,4 +1,4 @@
-import { MermaidTheme } from "./theme";
+import { MermaidTheme, contextualizeTheme } from "./theme";
 
 const THEMED_FLAG = "data-slick-themed";
 
@@ -38,6 +38,10 @@ const ER_ATTRIBUTE_EVEN_SELECTORS = [".er.attributeBoxEven"].join(",");
 const isSvgElement = (el: Element): el is SVGElement =>
   el instanceof SVGElement;
 
+const clearInlineStyle = (el: Element): void => {
+  el.removeAttribute("style");
+};
+
 const readNumericAttribute = (
   el: Element,
   attribute: string,
@@ -49,6 +53,7 @@ const readNumericAttribute = (
 
 const setSvgFill = (el: Element, color: string): void => {
   if (!isSvgElement(el)) return;
+  clearInlineStyle(el);
   el.setCssProps({ fill: color });
   el.setAttribute("fill", color);
 };
@@ -95,6 +100,7 @@ const themeErTables = (svg: SVGSVGElement, theme: MermaidTheme): void => {
 const themeEdges = (svg: SVGSVGElement, theme: MermaidTheme): void => {
   svg.querySelectorAll(EDGE_PATH_SELECTORS).forEach((el) => {
     if (!isSvgElement(el)) return;
+    clearInlineStyle(el);
     el.setCssProps({
       stroke: theme.edgeStroke,
       fill: "none",
@@ -157,6 +163,7 @@ const themeEdgeLabels = (svg: SVGSVGElement, theme: MermaidTheme): void => {
 
 const themeText = (svg: SVGSVGElement, theme: MermaidTheme): void => {
   svg.querySelectorAll<SVGTextElement>("text, tspan").forEach((el) => {
+    clearInlineStyle(el);
     el.setCssProps({ fill: theme.textColor });
     el.setAttribute("fill", theme.textColor);
   });
@@ -178,9 +185,11 @@ const themeText = (svg: SVGSVGElement, theme: MermaidTheme): void => {
  * caching that prevents external CSS from repainting).
  */
 const rewriteInternalStyle = (svg: SVGSVGElement, theme: MermaidTheme): void => {
+  const neutralOverrideMarker = "/* slick-mermaid-neutral-overrides */";
+  const svgScope = svg.id ? `#${svg.id}` : "";
   const styleNodes = svg.querySelectorAll("style");
   styleNodes.forEach((node) => {
-    const original = node.textContent ?? "";
+    const original = (node.textContent ?? "").split(neutralOverrideMarker)[0];
     const replaced = original
       .replace(/#ECECFF/gi, theme.nodeFill)
       .replace(/#9370DB/gi, theme.nodeStroke)
@@ -189,10 +198,38 @@ const rewriteInternalStyle = (svg: SVGSVGElement, theme: MermaidTheme): void => 
       .replace(/rgba\(232,\s*232,\s*232,?\s*[\d.]*\s*\)/gi, theme.edgeLabelBg)
       .replace(/#333333/gi, theme.edgeStroke)
       .replace(/#333(?![0-9a-f])/gi, theme.textColor)
-      .replace(/#552222/gi, theme.edgeStroke);
-    if (replaced !== original) {
-      node.textContent = replaced;
-    }
+      .replace(/#552222/gi, theme.edgeStroke)
+      .replace(/fill:\s*#[0-9a-f]{3,8}\s*!important/gi, `fill:${theme.nodeFill}!important`)
+      .replace(/stroke:\s*#[0-9a-f]{3,8}\s*!important/gi, `stroke:${theme.nodeStroke}!important`)
+      .replace(/color:\s*#[0-9a-f]{3,8}\s*!important/gi, `color:${theme.textColor}!important`);
+    node.textContent = `${replaced}
+${neutralOverrideMarker}
+${svgScope} .cluster rect,
+${svgScope} .cluster polygon,
+${svgScope} .cluster path {
+  fill: ${theme.clusterFill} !important;
+  stroke: ${theme.clusterStroke} !important;
+}
+${svgScope} .node rect,
+${svgScope} .node circle,
+${svgScope} .node ellipse,
+${svgScope} .node polygon,
+${svgScope} .node path,
+${svgScope} .basic.label-container,
+${svgScope} .label-container {
+  fill: ${theme.nodeFill} !important;
+  stroke: ${theme.nodeStroke} !important;
+}
+${svgScope} .label text,
+${svgScope} .label tspan,
+${svgScope} .cluster-label text,
+${svgScope} .cluster-label tspan,
+${svgScope} foreignObject,
+${svgScope} foreignObject * {
+  fill: ${theme.textColor} !important;
+  color: ${theme.textColor} !important;
+}
+`;
   });
 };
 
@@ -205,13 +242,14 @@ const rewriteInternalStyle = (svg: SVGSVGElement, theme: MermaidTheme): void => 
  * diagrams come out themed without needing repaint tricks.
  */
 export const applyTheme = (svg: SVGSVGElement, theme: MermaidTheme): SVGSVGElement => {
-  themeShapes(svg, theme);
-  themeClusters(svg, theme);
-  themeErTables(svg, theme);
-  themeEdges(svg, theme);
-  themeText(svg, theme);
-  themeEdgeLabels(svg, theme);
-  rewriteInternalStyle(svg, theme);
+  const contextualTheme = contextualizeTheme(theme, svg);
+  themeShapes(svg, contextualTheme);
+  themeClusters(svg, contextualTheme);
+  themeErTables(svg, contextualTheme);
+  themeEdges(svg, contextualTheme);
+  themeText(svg, contextualTheme);
+  themeEdgeLabels(svg, contextualTheme);
+  rewriteInternalStyle(svg, contextualTheme);
   svg.setAttribute(THEMED_FLAG, "true");
   return svg;
 };
