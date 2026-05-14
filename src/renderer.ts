@@ -3,6 +3,7 @@ import { applyTheme } from "./svg-theme";
 import { MermaidTheme } from "./theme";
 import { mountFullscreenButton } from "./fullscreen";
 import { normalizeMermaidSource } from "./source-normalizer";
+import type { SlickMermaidSettings } from "./settings";
 
 interface MermaidRenderResult {
   svg: string;
@@ -43,6 +44,7 @@ export const renderMermaidBlock = async (
   source: string,
   el: HTMLElement,
   getTheme: () => MermaidTheme,
+  getSettings: () => SlickMermaidSettings,
 ): Promise<void> => {
   const mermaid = await getMermaid();
   if (!mermaid) {
@@ -67,9 +69,9 @@ export const renderMermaidBlock = async (
 
     host.empty();
     host.appendChild(svg);
-    applyTheme(svg, getTheme());
+    applyTheme(svg, getTheme(), getSettings());
     result.bindFunctions?.(host);
-    mountFullscreenButton(app, host, getTheme);
+    mountFullscreenButton(app, host, getTheme, getSettings);
   } catch (err) {
     host.empty();
     host.createEl("pre", {
