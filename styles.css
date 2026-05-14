@@ -49,6 +49,10 @@
   opacity: 1;
 }
 
+.slick-mermaid-host.slick-mermaid-fs-btn-always .slick-mermaid-fs-btn {
+  opacity: 1;
+}
+
 .slick-mermaid-fs-btn {
   position: absolute;
   bottom: 6px;

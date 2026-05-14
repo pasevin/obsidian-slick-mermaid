@@ -28,9 +28,10 @@ const EDGE_LABEL_HTML_SELECTORS = [
   ".edgeLabel foreignObject span.edgeLabel p",
 ].join(",");
 
-const EDGE_LABEL_PADDING_X = 8;
-const EDGE_LABEL_PADDING_Y = 3;
-const EDGE_LABEL_PADDED_FLAG = "data-slick-edge-label-padded";
+const EDGE_LABEL_BASE_X = "data-slick-edge-label-base-x";
+const EDGE_LABEL_BASE_Y = "data-slick-edge-label-base-y";
+const EDGE_LABEL_BASE_W = "data-slick-edge-label-base-w";
+const EDGE_LABEL_BASE_H = "data-slick-edge-label-base-h";
 
 const ER_ENTITY_SELECTORS = [".er.entityBox"].join(",");
 
@@ -170,30 +171,48 @@ const themeEdges = (svg: SVGSVGElement, theme: MermaidTheme): void => {
   });
 };
 
-const themeEdgeLabels = (svg: SVGSVGElement, theme: MermaidTheme): void => {
+const themeEdgeLabels = (
+  svg: SVGSVGElement,
+  theme: MermaidTheme,
+  settings: SlickMermaidSettings,
+): void => {
+  const padX = settings.edgeLabelPadding;
+  const padY = settings.edgeLabelPadding;
+  const corner = settings.edgeLabelCornerRadius;
+  const borderRadiusCss = corner <= 0 ? "0" : corner >= 12 ? "999px" : `${corner}px`;
+
   svg.querySelectorAll(EDGE_LABEL_BG_SELECTORS).forEach((el) => {
     setSvgFill(el, theme.edgeLabelBg);
     if (isSvgElement(el)) {
       el.setCssProps({ opacity: "1" });
-      el.setAttribute("rx", "6");
-      el.setAttribute("ry", "6");
+      if (corner > 0) {
+        el.setAttribute("rx", String(corner));
+        el.setAttribute("ry", String(corner));
+      } else {
+        el.removeAttribute("rx");
+        el.removeAttribute("ry");
+      }
     }
   });
 
   svg.querySelectorAll<SVGForeignObjectElement>(".edgeLabel foreignObject").forEach((el) => {
-    if (el.hasAttribute(EDGE_LABEL_PADDED_FLAG)) return;
+    if (!el.hasAttribute(EDGE_LABEL_BASE_X)) {
+      el.setAttribute(EDGE_LABEL_BASE_X, el.getAttribute("x") ?? "0");
+      el.setAttribute(EDGE_LABEL_BASE_Y, el.getAttribute("y") ?? "0");
+      el.setAttribute(EDGE_LABEL_BASE_W, el.getAttribute("width") ?? "0");
+      el.setAttribute(EDGE_LABEL_BASE_H, el.getAttribute("height") ?? "0");
+    }
 
-    const width = readNumericAttribute(el, "width", 0);
-    const height = readNumericAttribute(el, "height", 0);
-    const x = readNumericAttribute(el, "x", 0);
-    const y = readNumericAttribute(el, "y", 0);
+    const bx = readNumericAttribute(el, EDGE_LABEL_BASE_X, 0);
+    const by = readNumericAttribute(el, EDGE_LABEL_BASE_Y, 0);
+    const bw = readNumericAttribute(el, EDGE_LABEL_BASE_W, 0);
+    const bh = readNumericAttribute(el, EDGE_LABEL_BASE_H, 0);
 
-    if (width > 0 && height > 0) {
-      el.setAttribute("x", String(x - EDGE_LABEL_PADDING_X));
-      el.setAttribute("y", String(y - EDGE_LABEL_PADDING_Y));
-      el.setAttribute("width", String(width + EDGE_LABEL_PADDING_X * 2));
-      el.setAttribute("height", String(height + EDGE_LABEL_PADDING_Y * 2));
-      el.setAttribute(EDGE_LABEL_PADDED_FLAG, "true");
+    if (bw > 0 && bh > 0) {
+      el.setAttribute("x", String(bx - padX));
+      el.setAttribute("y", String(by - padY));
+      el.setAttribute("width", String(bw + padX * 2));
+      el.setAttribute("height", String(bh + padY * 2));
     }
   });
 
@@ -211,7 +230,7 @@ const themeEdgeLabels = (svg: SVGSVGElement, theme: MermaidTheme): void => {
       "justify-content": "center",
       width: "100%",
       height: "100%",
-      "border-radius": "999px",
+      "border-radius": borderRadiusCss,
       "box-sizing": "border-box",
     });
   });
@@ -240,13 +259,17 @@ const themeText = (svg: SVGSVGElement, theme: MermaidTheme): void => {
  * is treated as a stylesheet edit, which works around the `contain: paint`
  * caching that prevents external CSS from repainting).
  */
-const rewriteInternalStyle = (svg: SVGSVGElement, theme: MermaidTheme): void => {
+const rewriteInternalStyle = (
+  svg: SVGSVGElement,
+  theme: MermaidTheme,
+  settings: SlickMermaidSettings,
+): void => {
   const neutralOverrideMarker = "/* slick-mermaid-neutral-overrides */";
   const svgScope = svg.id ? `#${svg.id}` : "";
   const styleNodes = svg.querySelectorAll("style");
   styleNodes.forEach((node) => {
     const original = (node.textContent ?? "").split(neutralOverrideMarker)[0];
-    const replaced = original
+    let replaced = original
       .replace(/#ECECFF/gi, theme.nodeFill)
       .replace(/#9370DB/gi, theme.nodeStroke)
       .replace(/#ffffde/gi, theme.clusterFill)
@@ -254,10 +277,20 @@ const rewriteInternalStyle = (svg: SVGSVGElement, theme: MermaidTheme): void => 
       .replace(/rgba\(232,\s*232,\s*232,?\s*[\d.]*\s*\)/gi, theme.edgeLabelBg)
       .replace(/#333333/gi, theme.edgeStroke)
       .replace(/#333(?![0-9a-f])/gi, theme.textColor)
-      .replace(/#552222/gi, theme.edgeStroke)
-      .replace(/fill:\s*#[0-9a-f]{3,8}\s*!important/gi, `fill:${theme.nodeFill}!important`)
-      .replace(/stroke:\s*#[0-9a-f]{3,8}\s*!important/gi, `stroke:${theme.nodeStroke}!important`)
-      .replace(/color:\s*#[0-9a-f]{3,8}\s*!important/gi, `color:${theme.textColor}!important`);
+      .replace(/#552222/gi, theme.edgeStroke);
+
+    if (settings.neutralizeAuthorStyles) {
+      replaced = replaced
+        .replace(/fill:\s*#[0-9a-f]{3,8}\s*!important/gi, `fill:${theme.nodeFill}!important`)
+        .replace(/stroke:\s*#[0-9a-f]{3,8}\s*!important/gi, `stroke:${theme.nodeStroke}!important`)
+        .replace(/color:\s*#[0-9a-f]{3,8}\s*!important/gi, `color:${theme.textColor}!important`);
+    }
+
+    if (!settings.neutralizeAuthorStyles) {
+      node.textContent = replaced;
+      return;
+    }
+
     node.textContent = `${replaced}
 ${neutralOverrideMarker}
 ${svgScope} .cluster rect,
@@ -302,15 +335,15 @@ export const applyTheme = (
   theme: MermaidTheme,
   settings: SlickMermaidSettings,
 ): SVGSVGElement => {
-  const contextualTheme = contextualizeTheme(theme, svg);
+  const contextualTheme = contextualizeTheme(theme, svg, settings.surfaceContrast);
   themeShapes(svg, contextualTheme);
   setContainerRadius(svg, settings);
   themeClusters(svg, contextualTheme);
   themeErTables(svg, contextualTheme);
   themeEdges(svg, contextualTheme);
   themeText(svg, contextualTheme);
-  themeEdgeLabels(svg, contextualTheme);
-  rewriteInternalStyle(svg, contextualTheme);
+  themeEdgeLabels(svg, contextualTheme, settings);
+  rewriteInternalStyle(svg, contextualTheme, settings);
   svg.setAttribute(THEMED_FLAG, "true");
   return svg;
 };

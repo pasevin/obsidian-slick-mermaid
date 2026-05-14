@@ -30,6 +30,7 @@ export default class SlickMermaidPlugin extends Plugin {
     this.addSettingTab(new SlickMermaidSettingTab(this.app, this, {
       getSettings: () => this.settings,
       updateSettings: (settings) => this.updateSettings(settings),
+      resetSettingsToDefaults: () => this.resetSettingsToDefaults(),
     }));
 
     // Hook Mermaid so future renders come out themed natively. This is the
@@ -109,6 +110,12 @@ export default class SlickMermaidPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
+  private async resetSettingsToDefaults(): Promise<void> {
+    this.settings = normalizeSettings(null);
+    await this.saveSettings();
+    this.refreshRenderedDiagrams(true);
+  }
+
   private async updateSettings(
     settings: Partial<SlickMermaidSettings>,
   ): Promise<void> {
@@ -160,7 +167,10 @@ export default class SlickMermaidPlugin extends Plugin {
     this.unpatchMermaid?.();
     this.unpatchMermaid = undefined;
 
-    const unpatch = await loadAndPatchMermaid(() => this.cachedTheme);
+    const unpatch = await loadAndPatchMermaid(
+      () => this.cachedTheme,
+      () => this.settings,
+    );
     if (patchVersion === this.mermaidPatchVersion) {
       this.unpatchMermaid = unpatch;
       return;

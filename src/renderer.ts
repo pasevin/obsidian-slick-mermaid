@@ -58,7 +58,10 @@ export const renderMermaidBlock = async (
   try {
     const result = await mermaid.render(
       makeRenderId(),
-      normalizeMermaidSource(source),
+      normalizeMermaidSource(source, {
+        normalizeFlowchartLabels: getSettings().compatNormalizeFlowchartLabels,
+        normalizeEscapedNewlines: getSettings().compatNormalizeEscapedNewlines,
+      }),
       renderHost,
     );
     const svg = parseSvg(result.svg);
