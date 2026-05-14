@@ -5,6 +5,12 @@ import { observeSvgs } from "./observer";
 import { mountFullscreenButton } from "./fullscreen";
 import { loadAndPatchMermaid } from "./mermaid-hook";
 import { renderMermaidBlock } from "./renderer";
+import {
+  DEFAULT_SETTINGS,
+  normalizeSettings,
+  SlickMermaidSettingTab,
+} from "./settings";
+import type { SlickMermaidSettings } from "./settings";
 
 const MERMAID_HOST_SELECTORS = [".mermaid", ".mermaid-preview"].join(",");
 
@@ -12,29 +18,53 @@ export default class SlickMermaidPlugin extends Plugin {
   private observer?: MutationObserver;
   private unpatchMermaid?: () => void;
   private cachedTheme: MermaidTheme = readTheme();
+  private settings: SlickMermaidSettings = { ...DEFAULT_SETTINGS };
   private mermaidPatchVersion = 0;
   private themeRefreshFrame?: number;
   private themeRefreshTimers: number[] = [];
 
-  onload(): void {
+  async onload(): Promise<void> {
+    await this.loadSettings();
     this.refreshTheme();
+
+    this.addSettingTab(new SlickMermaidSettingTab(this.app, this, {
+      getSettings: () => this.settings,
+      updateSettings: (settings) => this.updateSettings(settings),
+    }));
 
     // Hook Mermaid so future renders come out themed natively. This is the
     // primary mechanism — we don't rely on post-render mutation to win.
     void this.refreshMermaidPatch();
 
     this.registerMarkdownCodeBlockProcessor("mermaid", async (source, el) => {
-      await renderMermaidBlock(this.app, source, el, () => this.cachedTheme);
+      await renderMermaidBlock(
+        this.app,
+        source,
+        el,
+        () => this.cachedTheme,
+        () => this.settings,
+      );
     });
 
     this.registerMarkdownPostProcessor((el) => {
       this.themeContainersWithin(el);
     });
 
-    this.observer = observeSvgs(() => this.cachedTheme, (svg) => {
-      const host = svg.closest<HTMLElement>(MERMAID_HOST_SELECTORS);
-      if (host) mountFullscreenButton(this.app, host, () => this.cachedTheme);
-    });
+    this.observer = observeSvgs(
+      () => this.cachedTheme,
+      () => this.settings,
+      (svg) => {
+        const host = svg.closest<HTMLElement>(MERMAID_HOST_SELECTORS);
+        if (host) {
+          mountFullscreenButton(
+            this.app,
+            host,
+            () => this.cachedTheme,
+            () => this.settings,
+          );
+        }
+      },
+    );
 
     this.registerEvent(
       this.app.workspace.on("css-change", () => {
@@ -70,13 +100,30 @@ export default class SlickMermaidPlugin extends Plugin {
     this.cachedTheme = readTheme();
   }
 
+  private async loadSettings(): Promise<void> {
+    const data = await this.loadData() as Partial<SlickMermaidSettings> | null;
+    this.settings = normalizeSettings(data);
+  }
+
+  private async saveSettings(): Promise<void> {
+    await this.saveData(this.settings);
+  }
+
+  private async updateSettings(
+    settings: Partial<SlickMermaidSettings>,
+  ): Promise<void> {
+    this.settings = normalizeSettings({ ...this.settings, ...settings });
+    await this.saveSettings();
+    this.refreshRenderedDiagrams(true);
+  }
+
   private refreshRenderedDiagrams(repatchMermaid: boolean): void {
     this.refreshTheme();
     if (repatchMermaid) {
       // Re-apply Mermaid config so future renders use the new theme.
       void this.refreshMermaidPatch();
     }
-    themeAllVisibleSvgs(this.cachedTheme);
+    themeAllVisibleSvgs(this.cachedTheme, this.settings);
     this.themeContainersWithin(document.body);
   }
 
@@ -127,8 +174,13 @@ export default class SlickMermaidPlugin extends Plugin {
       .querySelectorAll<HTMLElement>(MERMAID_HOST_SELECTORS)
       .forEach((host) => {
         const svg = host.querySelector<SVGSVGElement>("svg");
-        if (svg) applyTheme(svg, this.cachedTheme);
-        mountFullscreenButton(this.app, host, () => this.cachedTheme);
+        if (svg) applyTheme(svg, this.cachedTheme, this.settings);
+        mountFullscreenButton(
+          this.app,
+          host,
+          () => this.cachedTheme,
+          () => this.settings,
+        );
       });
   }
 }

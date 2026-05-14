@@ -1,5 +1,6 @@
 import { applyTheme } from "./svg-theme";
 import { MermaidTheme } from "./theme";
+import type { SlickMermaidSettings } from "./settings";
 
 const isMermaidSvg = (el: Element): el is SVGSVGElement => {
   if (!(el instanceof SVGSVGElement)) return false;
@@ -21,11 +22,12 @@ const isMermaidSvg = (el: Element): el is SVGSVGElement => {
  */
 export const observeSvgs = (
   getTheme: () => MermaidTheme,
+  getSettings: () => SlickMermaidSettings,
   onThemedSvg?: (svg: SVGSVGElement) => void,
 ): MutationObserver => {
   const themeOne = (svg: SVGSVGElement): void => {
     try {
-      applyTheme(svg, getTheme());
+      applyTheme(svg, getTheme(), getSettings());
       onThemedSvg?.(svg);
     } catch (err) {
       console.error("[slick-mermaid] applyTheme failed", err);

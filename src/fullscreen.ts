@@ -1,6 +1,7 @@
 import { App, Modal, setIcon } from "obsidian";
 import { applyTheme } from "./svg-theme";
 import { MermaidTheme } from "./theme";
+import type { SlickMermaidSettings } from "./settings";
 
 const FS_BUTTON_CLASS = "slick-mermaid-fs-btn";
 const FS_BUTTON_FLAG = "data-slick-fs";
@@ -47,12 +48,19 @@ const applyTransform = (svg: SVGSVGElement, state: PanZoomState): void => {
 class FullscreenSvgModal extends Modal {
   private readonly source: SVGSVGElement;
   private readonly theme: MermaidTheme;
+  private readonly settings: SlickMermaidSettings;
   private cleanupPanZoom?: () => void;
 
-  constructor(app: App, source: SVGSVGElement, theme: MermaidTheme) {
+  constructor(
+    app: App,
+    source: SVGSVGElement,
+    theme: MermaidTheme,
+    settings: SlickMermaidSettings,
+  ) {
     super(app);
     this.source = source;
     this.theme = theme;
+    this.settings = settings;
   }
 
   onOpen(): void {
@@ -84,7 +92,7 @@ class FullscreenSvgModal extends Modal {
     });
 
     stage.appendChild(clone);
-    applyTheme(clone, this.theme);
+    applyTheme(clone, this.theme, this.settings);
     this.cleanupPanZoom = this.schedulePanZoomSetup(stage, clone, size);
   }
 
@@ -231,6 +239,7 @@ export const mountFullscreenButton = (
   app: App,
   container: HTMLElement,
   getTheme: () => MermaidTheme,
+  getSettings: () => SlickMermaidSettings,
 ): void => {
   const existingButton = Array.from(container.children).find((el) =>
     el.hasClass(FS_BUTTON_CLASS),
@@ -250,7 +259,7 @@ export const mountFullscreenButton = (
   const open = (): void => {
     const svg = container.querySelector<SVGSVGElement>("svg");
     if (!svg) return;
-    new FullscreenSvgModal(app, svg, getTheme()).open();
+    new FullscreenSvgModal(app, svg, getTheme(), getSettings()).open();
   };
 
   button.addEventListener("click", (event) => {

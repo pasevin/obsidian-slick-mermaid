@@ -56,6 +56,11 @@ Done. All Mermaid diagrams in the vault will use the new theme.
 - Re-themes visible and virtualized diagrams after theme switches, without needing an Obsidian restart.
 - Disables theme-level Mermaid SVG invert filters when present, so correctly themed diagrams are not visually inverted.
 
+### Opinionated Controls
+
+- Adds a plugin setting to turn opinionated container radius on or off.
+- Defaults to an `8px` radius for nodes and group wrappers, with a slider shown only when the radius setting is on.
+
 ### Better Mermaid Compatibility
 
 - Patches Mermaid rendering so diagrams are themed at first paint.

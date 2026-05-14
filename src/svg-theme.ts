@@ -1,6 +1,9 @@
 import { MermaidTheme, contextualizeTheme } from "./theme";
+import type { SlickMermaidSettings } from "./settings";
 
 const THEMED_FLAG = "data-slick-themed";
+const ORIGINAL_RX_ATTR = "data-slick-original-rx";
+const ORIGINAL_RY_ATTR = "data-slick-original-ry";
 
 const SHAPE_SELECTORS = [
   ".node rect",
@@ -35,6 +38,16 @@ const ER_ATTRIBUTE_ODD_SELECTORS = [".er.attributeBoxOdd"].join(",");
 
 const ER_ATTRIBUTE_EVEN_SELECTORS = [".er.attributeBoxEven"].join(",");
 
+const CONTAINER_RADIUS_SELECTORS = [
+  ".node rect",
+  ".node .basic.label-container",
+  ".node .label-container",
+  ".cluster rect",
+  ".er.entityBox",
+  ".er.attributeBoxOdd",
+  ".er.attributeBoxEven",
+].join(",");
+
 const isSvgElement = (el: Element): el is SVGElement =>
   el instanceof SVGElement;
 
@@ -66,6 +79,49 @@ const setSvgStroke = (el: Element, color: string, width?: string): void => {
     el.setCssProps({ "stroke-width": width });
     el.setAttribute("stroke-width", width);
   }
+};
+
+const rememberOriginalRadius = (el: SVGElement): void => {
+  if (!el.hasAttribute(ORIGINAL_RX_ATTR)) {
+    el.setAttribute(ORIGINAL_RX_ATTR, el.getAttribute("rx") ?? "");
+  }
+  if (!el.hasAttribute(ORIGINAL_RY_ATTR)) {
+    el.setAttribute(ORIGINAL_RY_ATTR, el.getAttribute("ry") ?? "");
+  }
+};
+
+const restoreRadiusAttribute = (
+  el: SVGElement,
+  originalAttribute: string,
+  targetAttribute: string,
+): void => {
+  const originalValue = el.getAttribute(originalAttribute);
+  if (originalValue === null) return;
+  if (originalValue === "") {
+    el.removeAttribute(targetAttribute);
+    return;
+  }
+  el.setAttribute(targetAttribute, originalValue);
+};
+
+const setContainerRadius = (
+  svg: SVGSVGElement,
+  settings: SlickMermaidSettings,
+): void => {
+  svg.querySelectorAll<SVGElement>(CONTAINER_RADIUS_SELECTORS).forEach((el) => {
+    if (!(el instanceof SVGRectElement)) return;
+
+    rememberOriginalRadius(el);
+
+    if (!settings.nodeRadiusEnabled) {
+      restoreRadiusAttribute(el, ORIGINAL_RX_ATTR, "rx");
+      restoreRadiusAttribute(el, ORIGINAL_RY_ATTR, "ry");
+      return;
+    }
+
+    el.setAttribute("rx", String(settings.nodeRadius));
+    el.setAttribute("ry", String(settings.nodeRadius));
+  });
 };
 
 const themeShapes = (svg: SVGSVGElement, theme: MermaidTheme): void => {
@@ -241,9 +297,14 @@ ${svgScope} foreignObject * {
  * with our themeVariables (see src/mermaid-hook.ts), so newly created
  * diagrams come out themed without needing repaint tricks.
  */
-export const applyTheme = (svg: SVGSVGElement, theme: MermaidTheme): SVGSVGElement => {
+export const applyTheme = (
+  svg: SVGSVGElement,
+  theme: MermaidTheme,
+  settings: SlickMermaidSettings,
+): SVGSVGElement => {
   const contextualTheme = contextualizeTheme(theme, svg);
   themeShapes(svg, contextualTheme);
+  setContainerRadius(svg, settings);
   themeClusters(svg, contextualTheme);
   themeErTables(svg, contextualTheme);
   themeEdges(svg, contextualTheme);
@@ -254,8 +315,11 @@ export const applyTheme = (svg: SVGSVGElement, theme: MermaidTheme): SVGSVGEleme
   return svg;
 };
 
-export const themeAllVisibleSvgs = (theme: MermaidTheme): void => {
+export const themeAllVisibleSvgs = (
+  theme: MermaidTheme,
+  settings: SlickMermaidSettings,
+): void => {
   document
     .querySelectorAll<SVGSVGElement>(".mermaid svg, .mermaid-preview svg")
-    .forEach((svg) => applyTheme(svg, theme));
+    .forEach((svg) => applyTheme(svg, theme, settings));
 };
