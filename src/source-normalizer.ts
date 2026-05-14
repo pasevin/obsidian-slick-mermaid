@@ -1,5 +1,10 @@
 const FLOWCHART_START = /^\s*(?:flowchart|graph)\b/i;
 
+export interface MermaidNormalizeOptions {
+  normalizeFlowchartLabels: boolean;
+  normalizeEscapedNewlines: boolean;
+}
+
 const needsQuotedLabel = (label: string): boolean => {
   const trimmed = label.trim();
   if (trimmed.length === 0) return false;
@@ -12,20 +17,55 @@ const needsQuotedLabel = (label: string): boolean => {
 const normalizeEscapedLineBreaks = (label: string): string =>
   label.replace(/\\n/g, "<br/>");
 
-const quoteLabel = (label: string): string =>
-  `["${normalizeEscapedLineBreaks(label).replace(/"/g, "#quot;")}"]`;
+const applyNewlines = (label: string, options: MermaidNormalizeOptions): string =>
+  options.normalizeEscapedNewlines ? normalizeEscapedLineBreaks(label) : label;
 
-const normalizeLabel = (label: string): string => {
-  const normalized = normalizeEscapedLineBreaks(label);
-  return needsQuotedLabel(normalized) ? quoteLabel(normalized) : `[${normalized}]`;
-};
-
-const normalizeEdgeLabels = (line: string): string =>
-  line.replace(/\|([^|]*)\|/g, (_match, label: string) =>
+const normalizeEdgeLabels = (line: string, options: MermaidNormalizeOptions): string => {
+  if (!options.normalizeEscapedNewlines) return line;
+  return line.replace(/\|([^|]*)\|/g, (_match, label: string) =>
     `|${normalizeEscapedLineBreaks(label)}|`,
   );
+};
 
-const normalizeFlowchartLine = (line: string): string => {
+const normalizeLabel = (label: string, options: MermaidNormalizeOptions): string => {
+  const text = applyNewlines(label, options);
+  if (options.normalizeFlowchartLabels && needsQuotedLabel(text)) {
+    return `["${text.replace(/"/g, "#quot;")}"]`;
+  }
+  return `[${text}]`;
+};
+
+const normalizeFlowchartLine = (line: string, options: MermaidNormalizeOptions): string => {
+  if (!options.normalizeFlowchartLabels && !options.normalizeEscapedNewlines) {
+    return line;
+  }
+
+  if (!options.normalizeFlowchartLabels && options.normalizeEscapedNewlines) {
+    let result = "";
+    let index = 0;
+
+    while (index < line.length) {
+      const start = line.indexOf("[", index);
+      if (start === -1) {
+        result += line.slice(index);
+        break;
+      }
+
+      const end = line.indexOf("]", start + 1);
+      if (end === -1) {
+        result += line.slice(index);
+        break;
+      }
+
+      const label = line.slice(start + 1, end);
+      result += line.slice(index, start);
+      result += `[${applyNewlines(label, options)}]`;
+      index = end + 1;
+    }
+
+    return normalizeEdgeLabels(result, options);
+  }
+
   let result = "";
   let index = 0;
 
@@ -44,11 +84,11 @@ const normalizeFlowchartLine = (line: string): string => {
 
     const label = line.slice(start + 1, end);
     result += line.slice(index, start);
-    result += normalizeLabel(label);
+    result += normalizeLabel(label, options);
     index = end + 1;
   }
 
-  return normalizeEdgeLabels(result);
+  return normalizeEdgeLabels(result, options);
 };
 
 /**
@@ -64,7 +104,10 @@ const normalizeFlowchartLine = (line: string): string => {
  *   A["Smart Contracts\n(on-chain events)"]
  *   -> A["Smart Contracts<br/>(on-chain events)"]
  */
-export const normalizeMermaidSource = (source: string): string => {
+export const normalizeMermaidSource = (
+  source: string,
+  options: MermaidNormalizeOptions,
+): string => {
   const lines = source.split("\n");
   const firstMeaningfulLine = lines.find((line) => {
     const trimmed = line.trim();
@@ -75,5 +118,9 @@ export const normalizeMermaidSource = (source: string): string => {
     return source;
   }
 
-  return lines.map(normalizeFlowchartLine).join("\n");
+  if (!options.normalizeFlowchartLabels && !options.normalizeEscapedNewlines) {
+    return source;
+  }
+
+  return lines.map((line) => normalizeFlowchartLine(line, options)).join("\n");
 };

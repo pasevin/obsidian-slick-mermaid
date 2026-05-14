@@ -1,6 +1,7 @@
 import { loadMermaid } from "obsidian";
 import { MermaidTheme } from "./theme";
-import { normalizeMermaidSource } from "./source-normalizer";
+import { normalizeMermaidSource, type MermaidNormalizeOptions } from "./source-normalizer";
+import type { SlickMermaidSettings } from "./settings";
 
 /**
  * Obsidian bundles a single Mermaid instance and exposes it as `window.mermaid`.
@@ -75,11 +76,21 @@ const findMermaid = (): MermaidLike | undefined => {
   return w.mermaid;
 };
 
+const normalizeOptionsFromSettings = (
+  settings: SlickMermaidSettings,
+): MermaidNormalizeOptions => ({
+  normalizeFlowchartLabels: settings.compatNormalizeFlowchartLabels,
+  normalizeEscapedNewlines: settings.compatNormalizeEscapedNewlines,
+});
+
 /**
  * Patch mermaid.initialize so every call merges our theme. Returns a cleanup
  * function that restores the original initialize.
  */
-export const patchMermaid = (getTheme: () => MermaidTheme): (() => void) => {
+export const patchMermaid = (
+  getTheme: () => MermaidTheme,
+  getSettings: () => SlickMermaidSettings,
+): (() => void) => {
   const mermaid = findMermaid();
   if (!mermaid) {
     console.warn("[slick-mermaid] window.mermaid not available; skipping hook");
@@ -109,7 +120,11 @@ export const patchMermaid = (getTheme: () => MermaidTheme): (() => void) => {
 
   mermaid.initialize = merged as MermaidLike["initialize"];
   mermaid.render = ((id, source, container) =>
-    originalRender(id, normalizeMermaidSource(source), container)) as MermaidLike["render"];
+    originalRender(
+      id,
+      normalizeMermaidSource(source, normalizeOptionsFromSettings(getSettings())),
+      container,
+    )) as MermaidLike["render"];
 
   // Force an immediate re-init so any future renders pick up our theme.
   merged({});
@@ -125,7 +140,8 @@ export const patchMermaid = (getTheme: () => MermaidTheme): (() => void) => {
 
 export const loadAndPatchMermaid = async (
   getTheme: () => MermaidTheme,
+  getSettings: () => SlickMermaidSettings,
 ): Promise<() => void> => {
   await loadMermaid();
-  return patchMermaid(getTheme);
+  return patchMermaid(getTheme, getSettings);
 };

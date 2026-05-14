@@ -52,25 +52,29 @@ Done. All Mermaid diagrams in the vault will use the new theme.
 
 - Adapts Mermaid diagrams to the active Obsidian theme using standard theme variables.
 - Matches large diagram wrappers to the surrounding note surface, then adds subtle variation for nodes, borders, and edge-label pills.
-- Neutralizes Mermaid's explicit `style` / `classDef` colors so diagrams stay cohesive across themes.
+- Neutralizes Mermaid's explicit `style` / `classDef` colors by default so diagrams stay cohesive across themes (optional—can be disabled in settings).
 - Re-themes visible and virtualized diagrams after theme switches, without needing an Obsidian restart.
 - Disables theme-level Mermaid SVG invert filters when present, so correctly themed diagrams are not visually inverted.
 
-### Opinionated Controls
+### Opinionated controls
 
-- Adds a plugin setting to turn opinionated container radius on or off.
-- Defaults to an `8px` radius for nodes and group wrappers, with a slider shown only when the radius setting is on.
+Settings are grouped in the plugin tab (use **Reset to defaults** to restore factory settings):
 
-### Better Mermaid Compatibility
+- **Appearance**: container corner radius and surface contrast vs. the note background.
+- **Edge labels**: padding and corner radius for connector label pills.
+- **Diagram chrome**: expand button visibility (hover vs always) and whether double-clicking the inline diagram opens fullscreen.
+- **Compatibility**: toggles for flowchart label quoting, `\n` → line breaks in labels, and neutralizing author `style` / `classDef` colors.
+
+### Better Mermaid compatibility
 
 - Patches Mermaid rendering so diagrams are themed at first paint.
-- Normalizes common flowchart labels before parsing, so Obsidian accepts labels like `canTransfer(from, to, amount)` without requiring manual quotes.
-- Supports escaped newline labels like `A["Smart Contracts\n(on-chain events)"]`, rendering them as real multiline nodes instead of literal `\n` text.
+- Optional normalization of common flowchart labels before parsing, so Obsidian can accept labels like `canTransfer(from, to, amount)` without manual quotes.
+- Optional support for escaped newline labels like `A["Smart Contracts\n(on-chain events)"]`, rendering real multiline nodes instead of literal `\n` text.
 - Themes ER diagram table rows (`entityBox`, `attributeBoxOdd`, `attributeBoxEven`) so table-style components do not keep white backgrounds.
 
-### Larger Diagram Viewer
+### Larger diagram viewer
 
-- Adds an expand button and double-click shortcut for a larger dialog.
+- Adds an expand button and optional double-click shortcut for a larger dialog.
 - Opens diagrams fitted by default.
 - Supports drag-to-pan and wheel-to-zoom for wide or dense diagrams.
 - Keeps inline Mermaid SVGs contained in the note while allowing the dialog view to zoom freely.

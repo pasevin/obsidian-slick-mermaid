@@ -5,7 +5,7 @@ import type { SlickMermaidSettings } from "./settings";
 
 const FS_BUTTON_CLASS = "slick-mermaid-fs-btn";
 const FS_BUTTON_FLAG = "data-slick-fs";
-const FS_DBLCLICK_FLAG = "data-slick-fs-dblclick";
+const DBL_CLICK_HANDLER = "_slickMermaidHostDblClick";
 
 interface DiagramSize {
   width: number;
@@ -17,6 +17,8 @@ interface PanZoomState {
   x: number;
   y: number;
 }
+
+type HostWithDbl = HTMLElement & { [DBL_CLICK_HANDLER]?: (event: MouseEvent) => void };
 
 const MIN_SCALE = 0.25;
 const MAX_SCALE = 6;
@@ -241,20 +243,16 @@ export const mountFullscreenButton = (
   getTheme: () => MermaidTheme,
   getSettings: () => SlickMermaidSettings,
 ): void => {
-  const existingButton = Array.from(container.children).find((el) =>
-    el.hasClass(FS_BUTTON_CLASS),
-  );
-  if (container.getAttribute(FS_BUTTON_FLAG) === "true" && existingButton) {
-    return;
+  const settings = getSettings();
+
+  if (settings.expandButtonVisibility === "always") {
+    container.addClass("slick-mermaid-fs-btn-always");
+  } else {
+    container.removeClass("slick-mermaid-fs-btn-always");
   }
 
   container.setAttribute(FS_BUTTON_FLAG, "true");
   container.addClass("slick-mermaid-host");
-
-  const button = container.createEl("button", { cls: FS_BUTTON_CLASS });
-  button.setAttr("aria-label", "Open larger Mermaid diagram");
-  button.setAttr("title", "Open larger diagram");
-  setIcon(button, "expand");
 
   const open = (): void => {
     const svg = container.querySelector<SVGSVGElement>("svg");
@@ -262,18 +260,28 @@ export const mountFullscreenButton = (
     new FullscreenSvgModal(app, svg, getTheme(), getSettings()).open();
   };
 
-  button.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    open();
-  });
-
-  if (container.getAttribute(FS_DBLCLICK_FLAG) !== "true") {
-    container.setAttribute(FS_DBLCLICK_FLAG, "true");
-    container.addEventListener("dblclick", (event) => {
+  let button = container.querySelector<HTMLButtonElement>(`.${FS_BUTTON_CLASS}`);
+  if (!button) {
+    button = container.createEl("button", { cls: FS_BUTTON_CLASS });
+    button.setAttr("aria-label", "Open larger Mermaid diagram");
+    button.setAttr("title", "Open larger diagram");
+    setIcon(button, "expand");
+    button.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
       open();
     });
   }
+
+  const host = container as HostWithDbl;
+  if (host[DBL_CLICK_HANDLER] !== undefined) {
+    container.removeEventListener("dblclick", host[DBL_CLICK_HANDLER]);
+  }
+  host[DBL_CLICK_HANDLER] = (event: MouseEvent): void => {
+    if (!getSettings().inlineDoubleClickOpensFullscreen) return;
+    event.preventDefault();
+    event.stopPropagation();
+    open();
+  };
+  container.addEventListener("dblclick", host[DBL_CLICK_HANDLER]);
 };

@@ -130,18 +130,21 @@ export function readTheme(): MermaidTheme {
 export function contextualizeTheme(
   theme: MermaidTheme,
   root: Element,
+  contrastPercent: number,
 ): MermaidTheme {
   const surfaceColor = visibleBackgroundFor(root);
   const surface = surfaceColor ? parseCssColor(surfaceColor) : null;
   if (!surfaceColor || !surface) return theme;
 
+  const factor = Math.min(1.5, Math.max(0.5, contrastPercent / 100));
+
   return {
     ...theme,
     canvas: surfaceColor,
-    clusterFill: varySurface(surface, 0.025),
-    edgeLabelBg: varySurface(surface, 0.08),
-    nodeFill: varySurface(surface, 0.07),
-    nodeStroke: varySurface(surface, 0.14),
-    clusterStroke: varySurface(surface, 0.11),
+    clusterFill: varySurface(surface, 0.025 * factor),
+    edgeLabelBg: varySurface(surface, 0.08 * factor),
+    nodeFill: varySurface(surface, 0.07 * factor),
+    nodeStroke: varySurface(surface, 0.14 * factor),
+    clusterStroke: varySurface(surface, 0.11 * factor),
   };
 }
