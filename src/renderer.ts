@@ -32,9 +32,9 @@ const makeRenderId = (): string => {
 const parseSvg = (svgText: string): SVGSVGElement | null => {
   const document = new DOMParser().parseFromString(
     svgText.trim(),
-    "image/svg+xml",
+    "text/html",
   );
-  const svg = document.documentElement;
+  const svg = document.querySelector("svg");
   return svg instanceof SVGSVGElement ? svg : null;
 };
 
